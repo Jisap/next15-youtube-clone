@@ -1,6 +1,7 @@
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import Image from "next/image"
 import Link from "next/link"
+import { SearchInput } from "./SearchInput"
 
 
 
@@ -31,6 +32,9 @@ export const HomeNavbar = () => {
         </div>
 
         {/* Search Bar */}
+        <div className="flex-1 flex justify-center max-w-[720px] mx-auto">
+          <SearchInput />
+        </div>
       </div>
     </div>
   )
