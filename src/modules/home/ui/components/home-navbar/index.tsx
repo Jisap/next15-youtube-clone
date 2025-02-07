@@ -10,7 +10,7 @@ import { AuthButton } from "@/modules/auth/ui/components/auth-button"
 
 export const HomeNavbar = () => {
   return (
-    <div className="fixed top-0 left-0 right-0 h-16 flex items-center px-2 pr-5 z-50 bg-pink-200">
+    <div className="fixed top-0 left-0 right-0 h-16 flex items-center px-2 pr-5 z-50 bg-white">
       <div className="flex items-center gap-4 w-full">
         {/* Menu and logo */}
         <div className="flex items-center flex-shrink-0">
