@@ -33,12 +33,12 @@ export const MainSection = () => {
               <SidebarMenuButton
                 tooltip={item.title}
                 asChild
-                isActive={false}
-                onClick={() => {}}
+                isActive={false} // TODO: Change to look at current pathname
+                onClick={() => {}} // TODO: Add logic to handle click
               >
-                <Link href={item.url}>
+                <Link href={item.url} className="flex items-center gap-4">
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span className="text-sm">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
