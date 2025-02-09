@@ -1,6 +1,9 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
+import { users } from '@/db/schema'
+import { db } from '../../../../db'
+import { eq } from 'drizzle-orm'
 
 export async function POST(req: Request) {                                          // Clerk hara una petición POST al webhook cuando se envíe un evento relacionado con un usuario
   const SIGNING_SECRET = process.env.CLERK_SIGNING_SECRET
@@ -33,7 +36,7 @@ export async function POST(req: Request) {                                      
 
   // Verify payload with headers
   try {
-    evt = wh.verify(body, {                                                        // Se intenta verificar la autenticidad del webhook usando wh.verify().
+    evt = wh.verify(body, {                                                         // Se intenta verificar la autenticidad del webhook usando wh.verify().
       'svix-id': svix_id,
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
@@ -45,12 +48,30 @@ export async function POST(req: Request) {                                      
     })
   }
 
-  // Do something with payload
-  // For this guide, log payload to console
-  const { id } = evt.data
-  const eventType = evt.type                                                        // Verificada su autenticidad se extrae el id del evento y su type para identificarlos en los logs.
-  console.log(`Received webhook with ID ${id} and event type of ${eventType}`)      // Se realizan las acciones que se deseen con el webhook.
-  console.log('Webhook payload:', body)
+  const eventType = evt.type                                                        // Verificada su autenticidad se extrae el eventType del webhook.
+ 
+  
+  if(eventType === 'user.created') {                                                // Y con el tipo se realizan las acciones que se deseen con el webhook.
+    const { data } = evt
+       
+    await db.insert(users).values({
+      clerkId: data.id,
+      name: `${data.first_name} ${data.last_name}`,
+      imageUrl: data.image_url,
+    })
+  }
+
+  if(eventType === 'user.deleted') {
+    const { data } = evt
+
+    if(!data.id) {
+      return new Response('Error: Missing User ID', {
+        status: 400,
+      })
+    }
+
+    await db.delete(users).where(eq(users.clerkId, data.id))
+  }
 
   return new Response('Webhook received', { status: 200 })
 }
