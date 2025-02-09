@@ -73,5 +73,22 @@ export async function POST(req: Request) {                                      
     await db.delete(users).where(eq(users.clerkId, data.id))
   }
 
+  if(eventType === 'user.updated') {
+    const { data } = evt
+
+    if(!data.id) {
+      return new Response('Error: Missing User ID', {
+        status: 400,
+      })
+    }
+
+    await db
+      .update(users)
+      .set({
+        name: `${data.first_name} ${data.last_name}`,
+        imageUrl: data.image_url,
+      }).where(eq(users.clerkId, data.id))
+  }
+
   return new Response('Webhook received', { status: 200 })
 }
