@@ -1,5 +1,6 @@
 import { initTRPC } from '@trpc/server';                             // función que inicializa tRPC en el backend
 import { cache } from 'react';                                       // memoiza la función createTRPCContext. Memoizar significa que el resultado de la función se guarda en caché, y si la función se llama con los mismos argumentos de nuevo, el resultado guardado se devuelve en lugar de ejecutar la función de nuevo.
+import superjson from 'superjson'
 
 export const createTRPCContext = cache(async () => {                 // Define el contexto de los procedimientos tRPC. Permite acceder a datos como información del usuario autenticado, conexiones a bases de datos, o cualquier otra cosa que necesites para manejar las solicitudes.
   /**
@@ -12,7 +13,7 @@ const t = initTRPC.create({                                          // Instanci
   /**
    * @see https://trpc.io/docs/server/data-transformers
    */
-  // transformer: superjson,
+  transformer: superjson,
 });
 
 // Base router and procedure helpers
