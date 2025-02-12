@@ -22,7 +22,7 @@ const t = initTRPC.context<Context>().create({                        // Inicial
 });
 
 // Base router and procedure helpers
-export const createTRPCRouter = t.router;                             // Crea una función helper para crear routers tRPC. Un router es una colección de procedimientos relacionados
+export const createTRPCRouter = t.router;                             // Crea una función helper para crear instancias de routers tRPC. Un router es una colección de procedimientos relacionados
 export const createCallerFactory = t.createCallerFactory;             // Crea una función para generar "callers". Un caller te permite ejecutar procedimientos tRPC directamente en el backend, sin necesidad de una solicitud HTTP.
 export const baseProcedure = t.procedure;                             // Crea una función helper (base) para definir procedimientos tRPC base. Un procedimiento es una función que se ejecuta en el servidor cuando el cliente hace una solicitud.  
 

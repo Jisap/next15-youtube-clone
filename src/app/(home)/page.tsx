@@ -7,7 +7,8 @@ import { ErrorBoundary } from "react-error-boundary";
 
 export default async function Home() {
 
-  void trpc.hello.prefetch({ text: "Antonio" });    // Almacena en caché la respuesta de hello para que el cliente la use.
+  //void trpc.hello.prefetch({ text: "Antonio" });    // Almacena en caché la respuesta de hello para que el cliente la use.
+  void trpc.categories.getMany.prefetch()
 
   return (
     // Hidrata esos datos en el cliente.
