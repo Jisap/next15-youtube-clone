@@ -39,12 +39,18 @@ export function TRPCProvider(                                                   
   }>,
 ) {
   const queryClient = getQueryClient();                                            // getQueryClient(), que devuelve una instancia de QueryClient (nueva en el servidor o singleton en el cliente). 
-  const [trpcClient] = useState(() =>                                              // trpc.createClient, que configura el cliente tRPC con un enlace (httpBatchLink) para enviar solicitudes a la URL base.
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          transformer: superjson, 
-          url: getUrl(),
+  
+  const [trpcClient] = useState(() =>                                              // Se usa useState con una función de inicialización, lo que significa que la función solo se ejecutará una vez, cuando el componente se monte.
+    trpc.createClient({                                                            // Se usa createClient de tRPC para configurar el cliente.
+      links: [                                                                     // Configuracion de links -> links en tRPC define cómo se comunican las solicitudes con el backend.
+        httpBatchLink({                                                            // httpBatchLink es un link que permite permite agrupar varias solicitudes en una sola petición HTTP.
+          transformer: superjson,                                                        // superjson permite serializar y deserializar datos complejos correctamente.
+          url: getUrl(),                                                                 // getUrl devuelve devuelve la URL del servidor tRPC.
+          async headers() {                                                              // Agrega un header personalizado para identificar el origen de la petición.
+            const headers = new Headers();
+            headers.set("x-trpc-source", "nextjs-react");
+            return headers;
+          }
         }),
       ],
     }),
