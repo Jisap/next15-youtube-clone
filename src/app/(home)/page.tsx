@@ -3,6 +3,7 @@
 import { HydrateClient, trpc } from "@/trpc/server";
 import { PageClient } from "./protected/client";
 import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 export default async function Home() {
 
@@ -13,7 +14,9 @@ export default async function Home() {
     <HydrateClient>
       {/* Maneja la carga mientras los datos se obtienen. */}
       <Suspense fallback={<p>Loading...</p>}>
+      <ErrorBoundary fallback={<p>Error...</p>}>
         <PageClient />
+      </ErrorBoundary>
       </Suspense>
     </HydrateClient>
   );
