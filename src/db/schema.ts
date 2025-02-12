@@ -1,4 +1,5 @@
 
+import { create } from "domain";
 import { pgTable, uuid, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 
@@ -14,3 +15,12 @@ export const users = pgTable("users", {
 
 // Se crea un índice único llamado `clerk_id_idx` sobre la columna `clerkId`.
 // Este índice garantiza que no haya duplicados en la columna `clerkId` y mejora el rendimiento de las consultas que filtran por `clerkId`
+
+
+export const categories = pgTable("categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+},(t) => [uniqueIndex("name_idx").on(t.name)]);
