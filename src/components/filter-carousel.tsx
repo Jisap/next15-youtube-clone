@@ -62,7 +62,7 @@ export const FilterCarousel = ({
         <CarouselContent className="-ml-3">
           <CarouselItem className="pl-3 basis-auto">
             <Badge
-              variant={value === null ? "default" : "secondary"}
+              variant={!value ? "default" : "secondary"}
               className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
             >
               All
