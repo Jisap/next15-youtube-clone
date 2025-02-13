@@ -11,6 +11,7 @@ import {
 import { Badge } from "./ui/badge";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 
 interface FilterCarouselProps {
@@ -68,7 +69,18 @@ export const FilterCarousel = ({
               All
             </Badge>
           </CarouselItem>
-          { data.map((item) => (
+
+          {isLoading && 
+            Array.from({ length: 14}).map((_, i) => (
+              <CarouselItem key={i} className="pl-3 basis-auto">
+                <Skeleton className="rounded-lg px-3 py-1 h-full text-sm w-[100px] font-semibold">
+                  &nbsp;
+                </Skeleton>
+              </CarouselItem>
+            ))
+          }
+
+          { !isLoading && data.map((item) => (  
             <CarouselItem key={item.value} className="pl-3 basis-auto">
               <Badge
                 variant={value === item.value ? "default" : "secondary"}
