@@ -26,9 +26,9 @@ interface FilterCarouselProps {
 
 export const FilterCarousel = ({
   value,
-  onSelect,
+  onSelect = () => {}, // Add default value
   data,
-  isLoading,
+  isLoading  // Será inyectada por el Suspense
 }: FilterCarouselProps) => {
 
   const [api, setApi] = useState<CarouselApi>(); // CarouselApi es una interfaz que proporciona métodos para manipular el componente de carousel.
@@ -62,7 +62,10 @@ export const FilterCarousel = ({
       >
         <CarouselContent className="-ml-3">
           {!isLoading && (
-            <CarouselItem className="pl-3 basis-auto">
+            <CarouselItem 
+              onClick={() => onSelect(null)}
+              className="pl-3 basis-auto"
+            >
               <Badge
                 variant={!value ? "default" : "secondary"}
                 className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
@@ -83,10 +86,14 @@ export const FilterCarousel = ({
           }
 
           { !isLoading && data.map((item) => (  
-            <CarouselItem key={item.value} className="pl-3 basis-auto">
+            <CarouselItem 
+              key={item.value} 
+              className="pl-3 basis-auto"
+              onClick={() => onSelect(item.value)}
+            >
               <Badge
                 variant={value === item.value ? "default" : "secondary"}
-                className="rounded-lg"
+                className="rounded-lg cursor-pointer"
               >
                 {item.label}
               </Badge>
