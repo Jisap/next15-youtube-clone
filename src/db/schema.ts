@@ -1,7 +1,7 @@
 
 
+import { relations } from "drizzle-orm";
 import { pgTable, uuid, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
-
 
 
 export const users = pgTable("users", {
@@ -24,3 +24,22 @@ export const categories = pgTable("categories", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },(t) => [uniqueIndex("name_idx").on(t.name)]);
+
+export const videos = pgTable("videos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  description: text("description"),
+  userId: uuid("user_id").references(() => users.id, {  // Referencia a la tabla `users` con el campo `id` ("user_id")
+    onDelete: "cascade",
+  }).notNull(), 
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const videoRelations = relations(videos, ({ one }) => ({     // Relaciones entre las tablas
+  user: one(users, {                                                // Relación 1-1 con la tabla `users`
+    fields: [videos.userId],                                        // Drizzle ORM necesita relations() para entender cómo conectar los datos a nivel de consultas. 
+    references: [users.id],                                         // De esta manera se define que, al hacer una consulta de videos,   
+  })                                                                // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
+}))
