@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { trpc } from "@/trpc/client"
 import { Loader2Icon, PlusIcon } from "lucide-react"
+import { toast } from "sonner"
 
 
 const StudioUploadModal = () => {
@@ -10,6 +11,7 @@ const StudioUploadModal = () => {
   const utils = trpc.useUtils();                      // Accde a las utilidades de caché de tRPC
   const create = trpc.videos.create.useMutation({
     onSuccess: () => {                                // Si la mutation fue exitosa
+      toast.success("Video created")
       utils.studio.getMany.invalidate();              // se invalida la caché de la consulta -> getMany se invoca automaticamente -> se actualiza interfaz UI
     }                                                
   })
