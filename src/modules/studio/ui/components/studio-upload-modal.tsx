@@ -9,9 +9,9 @@ const StudioUploadModal = () => {
 
   const utils = trpc.useUtils();                      // Accde a las utilidades de caché de tRPC
   const create = trpc.videos.create.useMutation({
-    onSuccess: () => {
-      utils.studio.getMany.invalidate();             // Invalida la caché de la consulta -> getMany se invoca automaticamente -> se actualiza interfaz UI
-    }                                                // tRPC sabe que los datos en la caché ya no son válidos y necesita volver a ejecutar la consulta para obtener los datos más recientes.
+    onSuccess: () => {                                // Si la mutation fue exitosa
+      utils.studio.getMany.invalidate();              // se invalida la caché de la consulta -> getMany se invoca automaticamente -> se actualiza interfaz UI
+    }                                                
   })
 
   return (
