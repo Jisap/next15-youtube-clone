@@ -13,6 +13,9 @@ const StudioUploadModal = () => {
     onSuccess: () => {                                // Si la mutation fue exitosa
       toast.success("Video created")
       utils.studio.getMany.invalidate();              // se invalida la caché de la consulta -> getMany se invoca automaticamente -> se actualiza interfaz UI
+    },
+    onError: (err) => {
+      toast.error(err.message)
     }                                                
   })
 
