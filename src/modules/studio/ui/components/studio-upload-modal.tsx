@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { trpc } from "@/trpc/client"
-import { PlusIcon } from "lucide-react"
+import { Loader2Icon, PlusIcon } from "lucide-react"
 
 
 const StudioUploadModal = () => {
@@ -18,8 +18,9 @@ const StudioUploadModal = () => {
     <Button 
       variant="secondary"
       onClick={() => create.mutate()}
+      disabled={create.isPending}                     // Se deshabilita el botón si la mutation está en proceso
     >
-      <PlusIcon className="size-5" />
+      {create.isPending ? <Loader2Icon className="animate-spin" /> :<PlusIcon className="size-5" />}
       <span className="text-sm">Create</span>
     </Button>
   )
