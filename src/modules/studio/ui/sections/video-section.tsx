@@ -16,7 +16,7 @@ export const VideoSection = () => {
 
   return (
     <div>
-      <h1>Video Section</h1>
+      {JSON.stringify(data)}
     </div>
   )
 }
