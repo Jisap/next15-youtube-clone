@@ -5,6 +5,17 @@ import { DEFAULT_LIMIT } from "@/constant"
 import { trpc } from "@/trpc/client"
 import { Suspense, useRef } from "react"
 import { ErrorBoundary } from "react-error-boundary"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import Link from "next/link"
+
 
 
 
@@ -21,22 +32,70 @@ export const VideoSection = () => {
 
 export const VideoSectionSuspense = () => {
 
-  const [data, query] = trpc.studio.getMany.useSuspenseInfiniteQuery({  // SuspenseInfiniteQuery de TRPC es una variante de SuspenseQuery de Tanstack Query
+  const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery({  // SuspenseInfiniteQuery de TRPC es una variante de SuspenseQuery de Tanstack Query
     limit: DEFAULT_LIMIT                                                // El objeto query contiene los métodos de consulta para manejar la consulta infinita
   },{
     getNextPageParam: (lastPage) => lastPage.nextCursor
   });
 
-  // TanStack Query maneja la paginación automáticamente al guardar cada respuesta como una "página" dentro de data.pages.
+  // TanStack Query maneja la paginación automáticamente al guardar cada respuesta como una "página" dentro de videos.pages.
 
   return (
     <div>
-      {JSON.stringify(data)}
+      <div className="border-y">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-6 w-[510px]">Video</TableHead>
+              <TableHead>Visibility</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead className="text-right">Views</TableHead>
+              <TableHead className="text-right">Comments</TableHead>
+              <TableHead className="text-right pr-6">Likes</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {videos.pages.flatMap(
+              (page) => page.items.map(
+                (video) => (
+                  <Link href={`/studio/videos/${video.id}`} key={video.id} legacyBehavior>
+                    <TableRow className="cursor-pointer">
+                      <TableCell>
+                        {video.title}
+                      </TableCell>
+                      <TableCell>
+                        visibility
+                      </TableCell>
+                      <TableCell>
+                        status
+                      </TableCell>
+                      <TableCell>
+                        date
+                      </TableCell>
+                      <TableCell className="text-right">
+                        views
+                      </TableCell>
+                      <TableCell className="text-right">
+                        Comments
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        Likes
+                      </TableCell>
+                    </TableRow>
+                  </Link>
+                )
+              )
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      
       <InfiniteScroll
         isManual                                      
         hasNextPage={query.hasNextPage}                        // hasNextPage: Se determina basándose en la presencia de nextCursor de nuestro procedimiento getMany
         isFetchingNextPage={query.isFetchingNextPage}          // Se activa cuando se está cargando la siguiente página mediante fetchNextPage.
-        fetchNextPage={query.fetchNextPage}                    // fetchNextPage es una función que tRPC genera automáticamente. Toma el nextCursor de la última página, hace una nueva petición con ese cursor y añade los nuevos datos al final de data.pages
+        fetchNextPage={query.fetchNextPage}                    // fetchNextPage es una función que tRPC genera automáticamente. Toma el nextCursor de la última página, hace una nueva petición con ese cursor y añade los nuevos datos al final de videos.pages
       />                                                       
     </div>
   )
