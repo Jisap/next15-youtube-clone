@@ -2,7 +2,7 @@
 
 import { DEFAULT_LIMIT } from "@/constant"
 import { trpc } from "@/trpc/client"
-import { Suspense } from "react"
+import { Suspense, useRef } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 
 
@@ -23,11 +23,14 @@ export const VideoSectionuSuspense = () => {
     limit: DEFAULT_LIMIT
   },{
     getNextPageParam: (lastPage) => lastPage.nextCursor
-  })
+  });
+
+  
 
   return (
     <div>
       {JSON.stringify(data)}
+  
     </div>
   )
 }

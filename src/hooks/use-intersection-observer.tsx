@@ -21,3 +21,6 @@ export const useIntersectionObserver = (options?: IntersectionObserverInit) => {
 
   return { isIntersecting, targetRef }
 }
+
+// entries solo tendrá un elemento porque solo observamos uno
+// const entry = entries[0];  // Es lo mismo que hacer [entry]
