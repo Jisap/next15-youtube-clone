@@ -1,6 +1,7 @@
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
-import { is } from "drizzle-orm";
+
 import { useEffect } from "react";
+import { Button } from "./ui/button";
 
 
 
@@ -32,6 +33,17 @@ export const InfiniteScroll = ({
   return (
     <div className="flex flex-col items-center gap-4 p-4"> 
       <div ref={targetRef} className="h-1"/>
+      {hasNextPage ? (
+        <Button
+          variant="secondary"
+          disabled={!hasNextPage || isFetchingNextPage}
+          onClick={() => fetchNextPage()}
+        >
+          {isFetchingNextPage ? "Loading..." : "Load More"}
+        </Button>
+      ): (
+        <p className="text-xs text-muted-foreground">No more items to load</p>
+      )}
     </div>
   )
 }
