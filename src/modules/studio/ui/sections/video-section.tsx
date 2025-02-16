@@ -33,7 +33,7 @@ export const VideoSectionSuspense = () => {
     <div>
       {JSON.stringify(data)}
       <InfiniteScroll
-        isManual
+        isManual                                      
         hasNextPage={query.hasNextPage}                        // hasNextPage: Se determina basándose en la presencia de nextCursor de nuestro procedimiento getMany
         isFetchingNextPage={query.isFetchingNextPage}          // Se activa cuando se está cargando la siguiente página mediante fetchNextPage.
         fetchNextPage={query.fetchNextPage}                    // fetchNextPage es una función que tRPC genera automáticamente. Toma el nextCursor de la última página, hace una nueva petición con ese cursor y añade los nuevos datos al final de data.pages
