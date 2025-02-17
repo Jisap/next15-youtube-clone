@@ -45,6 +45,20 @@ export const StudioUploader = ({ endpoint, onSuccess }: StudioUploaderProps) => 
             </Button>
           </MuxUploaderFileSelect>
         </div>
+        <span slot="separator" className="hidden" />
+        <MuxUploaderStatus 
+          muxUploader={UPLOADER_ID}
+          className="text-sm" 
+        />
+        <MuxUploaderProgress 
+          muxUploader={UPLOADER_ID}
+          className="text-sm"
+          type="percentage"
+        />
+        <MuxUploaderProgress
+          muxUploader={UPLOADER_ID}
+          type="bar"
+        />
       </MuxUploaderDrop>
     </div>
   )
