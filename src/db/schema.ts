@@ -16,7 +16,7 @@ export const users = pgTable("users", {
 // Se crea un índice único llamado `clerk_id_idx` sobre la columna `clerkId`.
 // Este índice garantiza que no haya duplicados en la columna `clerkId` y mejora el rendimiento de las consultas que filtran por `clerkId`
 
-export const userRelations = relations(users, ({many}) => ({  // Cada user tiene muchos videos
+export const userRelations = relations(users, ({many}) => ({       // Cada user tiene muchos videos
   video: many(videos)
 }))
 
@@ -32,7 +32,13 @@ export const videos = pgTable("videos", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   description: text("description"),
-  userId: uuid("user_id").references(() => users.id, {  // Referencia a la tabla `users` con el campo `id` ("user_id")
+  muxStatus: text("mux_status"),
+  muxAssetId: text("mux_asset_id").unique(),
+  muxUploadId: text("mux_upload_id").unique(),
+  muxPlayBackId: text("mux_playback_id").unique(),
+  muxTrackId: text("mux_track_id").unique(),
+  muxTracStatus: text("mux_track_status"),
+  userId: uuid("user_id").references(() => users.id, {              // Referencia a la tabla `users` con el campo `id` ("user_id")
     onDelete: "cascade",
   }).notNull(), 
   categoryId: uuid("category_id").references(() => categories.id, {
