@@ -12,7 +12,7 @@ const StudioUploadModal = () => {
 
   const utils = trpc.useUtils();                      // Accede a las utilidades de caché de tRPC
 
-  const create = trpc.videos.create.useMutation({     // Cuando se hace click en create se llama al procedimiento create -> invoca un uploader de mux -> devuelve una url -> abre el modal de progreso de carga
+  const create = trpc.videos.create.useMutation({     // Cuando se hace click en create se llama al procedimiento create -> devuelve una url de subida -> abre el modal de carga del video con la url obtenida
     onSuccess: () => {                                // Si la mutation fue exitosa
       toast.success("Video created")
       utils.studio.getMany.invalidate();              // se invalida la caché de la consulta -> getMany se invoca automaticamente -> se actualiza interfaz UI
@@ -26,12 +26,12 @@ const StudioUploadModal = () => {
     <>
       <ResponsiveModal
         title="Upload a video"
-        open={!!create.data?.url}                // Si la mutation devuelve la url del video
+        open={!!create.data?.url}                // Si la mutation devuelve la url de subida del video se abre el modal que contiene el uploader
         onOpenChange={() => create.reset()}      // Se resetea la mutation cuando se cierra el modal
       >
         {create.data?.url 
           ? <StudioUploader 
-              endpoint={create.data?.url} 
+              endpoint={create.data?.url}        // Al uploader de mux se le pasa la url de subida del video
               onSuccess={() => {}}
             /> 
           : <Loader2Icon className="animate-spin" />
