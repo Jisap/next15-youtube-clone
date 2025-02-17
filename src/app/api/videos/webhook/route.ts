@@ -55,8 +55,8 @@ export const POST = async(request: Request) => {
       await db                                                                  // Se actualiza la base de datos usando Drizzle 
         .update(videos)                                                         // Se busca en la tabla videos 
         .set({                                                                          // con Set se establecen los valores de muxAssetId y muxStatus 
-          muxAssetId: data.id,
-          muxStatus: data.status
+          muxAssetId: data.id,                                                          // id en mux del video subido
+          muxStatus: data.status                                                        // status del video subido
         })
         .where(eq(videos.muxUploadId, data.upload_id))                          // la fila donde muxUploadId coincida con data.upload_id
       break;
