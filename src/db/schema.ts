@@ -35,7 +35,9 @@ export const videos = pgTable("videos", {
   userId: uuid("user_id").references(() => users.id, {  // Referencia a la tabla `users` con el campo `id` ("user_id")
     onDelete: "cascade",
   }).notNull(), 
-
+  categoryId: uuid("category_id").references(() => categories.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -44,5 +46,13 @@ export const videoRelations = relations(videos, ({ one }) => ({     // Relacione
   user: one(users, {                                                // Relación 1-1 con la tabla `users`
     fields: [videos.userId],                                        // Drizzle ORM necesita relations() para entender cómo conectar los datos a nivel de consultas. 
     references: [users.id],                                         // De esta manera se define que, al hacer una consulta de videos,   
-  })                                                                // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
-}))
+  }),                                                               // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
+  category: one(categories, {
+    fields: [videos.categoryId],
+    references: [categories.id],
+  })
+}));
+
+export const categoryRelations = relations(categories, ({ many }) => ({
+  videos: many(videos)
+}));
