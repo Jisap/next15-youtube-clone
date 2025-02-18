@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link"
 import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail"
+import { snakeCaseToTitle } from "@/lib/utils"
 
 
 
@@ -72,13 +73,19 @@ export const VideoSectionSuspense = () => {
                               duration={video.duration || 0}
                             />
                           </div>
+                          <div className="flex flex-col overflow-hidden gap-y-1">
+                            <span className="text-sm line-clamp-1">{video.title}</span>
+                            <span className="text-xs text-muted-foreground line-clamp-1">{video.description || "No description"}</span>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         visibility
                       </TableCell>
                       <TableCell>
-                        status
+                        <div className="flex items-center">
+                          {snakeCaseToTitle(video.muxStatus || "error")}
+                        </div>
                       </TableCell>
                       <TableCell>
                         date
