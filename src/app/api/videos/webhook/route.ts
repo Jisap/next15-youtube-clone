@@ -121,6 +121,33 @@ export const POST = async(request: Request) => {
       await db
         .delete(videos)
         .where(eq(videos.muxUploadId, data.upload_id))
+      break;
+    }
+
+    // Se activa cuando una pista (track) de un video en Mux está lista para usarse.
+    // Este evento es útil cuando un video tiene pistas adicionales, como: Subtítulos, audio alternativo, transcripciones
+    case "video.asset.track.ready": {
+      const data = payload.data as VideoAssetTrackReadyWebhookEvent["data"] & { 
+        asset_id: string;                                                      // Typescript no puede inferir el tipo de asset_id, por lo que se lo asignamos manualmente
+      }
+
+      
+      const assetId = data.asset_id;                                            // Se extrae el ID del video en Mux.
+      const trackId = data.id;                                                  // Se extrae el ID de la pista en Mux.
+      const status = data.status;                                               // Se extrae el estado de la pista en Mux.
+
+      if (!assetId) {
+        return new Response("Missing asset ID", { status: 400 })
+      }
+
+      await db
+        .update(videos)
+        .set({                                                                  // Esto permite almacenar el estado de los subtítulos o audios alternativos dentro del sistema.
+          muxTrackId: trackId,
+          muxTrackStatus: status,
+        })
+        .where(eq(videos.muxAssetId, assetId))
+      break;
     }
   }
 
