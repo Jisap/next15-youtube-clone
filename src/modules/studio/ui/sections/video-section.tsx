@@ -65,7 +65,7 @@ export const VideoSectionSuspense = () => {
                       <TableCell>
                         <div className="flex items-center gap-4">
                           <div className="relative aspect-video w-36 shrink-0">
-                            <VideoThumbnail />
+                            <VideoThumbnail imageUrl={video.thumbnailUrl} />
                           </div>
                         </div>
                       </TableCell>
