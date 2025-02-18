@@ -21,6 +21,7 @@ type WenhookEvent =
 
 
 // Este endpoint en Next.js maneja los webhooks de Mux para actualizar el estado de los videos en la base de datos
+// cuando se envian videos a Mux
 
 export const POST = async(request: Request) => {
   if(!SIGNIN_SECRET){
@@ -46,6 +47,7 @@ export const POST = async(request: Request) => {
   )
 
   switch (payload.type as WenhookEvent["type"]) {                               // Se obtiene el tipo de evento del payload.
+    
     case "video.asset.created": {                                               // Si el evento es "video.asset.created", significa que un nuevo video ha sido creado en Mux.
       const data = payload.data as VideoAssetCreatedWebhookEvent["data"];       // Se extrae la información del data del evento.  
       if(!data.upload_id){
@@ -59,6 +61,33 @@ export const POST = async(request: Request) => {
           muxStatus: data.status                                                        // status del video subido
         })
         .where(eq(videos.muxUploadId, data.upload_id))                          // la fila donde muxUploadId coincida con data.upload_id
+      break;
+    }
+    // Este nuevo evento "video.asset.ready" se ejecuta cuando un video en 
+    // Mux ha sido procesado completamente y está listo para la reproducción.
+    case "video.asset.ready": {
+      const data = payload.data as VideoAssetReadyWebhookEvent["data"];         // data contiene los datos enviados por Mux cuando el video está listo.
+      const playbackId = data.playback_ids?.[0].id                              // Se extrae el playbackId del primer elemento de la lista de playback_ids. El playbackId es un identificador único que Mux asigna a un video para permitir su reproducción.
+      
+      if(!data.upload_id){
+        return new Response("No upload ID found", {status: 400})
+      }
+
+      if(!playbackId){
+        return new Response("No playback ID found", {status: 400})
+      }
+
+      const thumbnailUrl = `hhtps://image.mux.com/${playbackId}/thumbnail.png`   // Se crea una URL para obtener la miniatura del video
+    
+      await db                                                                   // Actualiza la base de datos con la información final del video 
+        .update(videos)
+        .set({
+          muxStatus: data.status,                                                // Se actualiza con el estado actual del video ("ready").
+          muxPlayBackId: playbackId,                                             // Se guarda el playbackId en la base de datos para reproducir el video en el frontend. 
+          muxAssetId: data.id,                                                   // Se guarda el id del video en Mux.
+          thumbnailUrl                                                           // Se guarda la URL de la miniatura del video.
+        })
+        .where(eq(videos.muxUploadId, data.upload_id))                           // Se busca la fila en la tabla videos donde muxUploadId coincide con data.upload_id
       break;
     }
   }
