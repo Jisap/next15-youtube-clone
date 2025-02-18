@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { formatDuration } from "@/lib/utils";
 
 interface VideoThumbnailProps {
   title: string;
@@ -34,7 +35,7 @@ export const VideoThumbnail = ({
 
       {/* Video Duration box */}
       <div className="absolute bottom-2 right-2 px-1 rounded bg-black/80 text-white text-xs font-medium">
-        {duration}
+        {formatDuration(duration ?? 0)}  {/* Proporciona un valor predeterminado de 0 */}
       </div>
     </div>
   )
