@@ -1,4 +1,3 @@
-
 import { eq } from "drizzle-orm";
 import {
   VideoAssetCreatedWebhookEvent,
@@ -77,7 +76,7 @@ export const POST = async(request: Request) => {
         return new Response("No playback ID found", {status: 400})
       }
 
-      const thumbnailUrl = `hhtps://image.mux.com/${playbackId}/thumbnail.png`   // Se crea una URL para obtener la miniatura del video
+      const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.png`   // Se crea una URL para obtener la miniatura del video
     
       await db                                                                   // Actualiza la base de datos con la información final del video 
         .update(videos)

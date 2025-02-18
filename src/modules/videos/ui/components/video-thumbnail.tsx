@@ -5,6 +5,7 @@ interface VideoThumbnailProps {
 }
 
 export const VideoThumbnail = ({imageUrl}: VideoThumbnailProps) => {
+
   return (
     <div className="relative">
       {/* Thumbnail wrapper*/}
