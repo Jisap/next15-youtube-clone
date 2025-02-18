@@ -17,6 +17,7 @@ import {
 import Link from "next/link"
 import { VideoThumbnail } from "@/modules/videos/ui/components/video-thumbnail"
 import { snakeCaseToTitle } from "@/lib/utils"
+import { format } from "date-fns"
 
 
 
@@ -35,7 +36,7 @@ export const VideoSection = () => {
 export const VideoSectionSuspense = () => {
 
   const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery({  // SuspenseInfiniteQuery de TRPC es una variante de SuspenseQuery de Tanstack Query
-    limit: DEFAULT_LIMIT                                                // El objeto query contiene los métodos de consulta para manejar la consulta infinita
+    limit: DEFAULT_LIMIT                                                  // El objeto query contiene los métodos de consulta para manejar la consulta infinita
   },{
     getNextPageParam: (lastPage) => lastPage.nextCursor
   });
@@ -60,7 +61,8 @@ export const VideoSectionSuspense = () => {
           <TableBody>
             {videos.pages.flatMap(
               (page) => page.items.map(
-                (video) => (
+                (video) => {
+                  return (
                   <Link href={`/studio/videos/${video.id}`} key={video.id} legacyBehavior>
                     <TableRow className="cursor-pointer">
                       <TableCell>
@@ -87,8 +89,8 @@ export const VideoSectionSuspense = () => {
                           {snakeCaseToTitle(video.muxStatus || "error")}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        date
+                      <TableCell className="text-sm truncate">
+                        {format(new Date(video.createdAt), "d MMM yyyy")}
                       </TableCell>
                       <TableCell className="text-right">
                         views
@@ -101,7 +103,7 @@ export const VideoSectionSuspense = () => {
                       </TableCell>
                     </TableRow>
                   </Link>
-                )
+                )}
               )
             )}
           </TableBody>

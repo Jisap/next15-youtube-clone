@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import {
   VideoAssetCreatedWebhookEvent,
+  VideoAssetDeletedWebhookEvent,
   VideoAssetErroredWebhookEvent,
   VideoAssetReadyWebhookEvent,
   VideoAssetTrackReadyWebhookEvent,
@@ -17,6 +18,7 @@ type WenhookEvent =
   | VideoAssetReadyWebhookEvent
   | VideoAssetErroredWebhookEvent
   | VideoAssetTrackReadyWebhookEvent
+  | VideoAssetDeletedWebhookEvent
 
 
 // Este endpoint en Next.js maneja los webhooks de Mux para actualizar el estado de los videos en la base de datos
@@ -77,17 +79,48 @@ export const POST = async(request: Request) => {
       }
 
       const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.png`   // Se crea una URL para obtener la miniatura del video
-    
+      const previewUrl = `https://image.mux.com/${playbackId}/animated.gif`      // Se crea una URL para obtener una vista previa del video
+      const duration = data.duration ? Math.round(data.duration * 1000) : 0;     // Se obtiene la duración del video                                            
+
       await db                                                                   // Actualiza la base de datos con la información final del video 
         .update(videos)
         .set({
           muxStatus: data.status,                                                // Se actualiza con el estado actual del video ("ready").
           muxPlayBackId: playbackId,                                             // Se guarda el playbackId en la base de datos para reproducir el video en el frontend. 
           muxAssetId: data.id,                                                   // Se guarda el id del video en Mux.
-          thumbnailUrl                                                           // Se guarda la URL de la miniatura del video.
+          thumbnailUrl,                                                          // Se guarda la URL de la miniatura del video.
+          previewUrl,                                                            // Se guarda la URL de la vista previa del video.
+          duration,                                                              // Se guarda la duración del video.
         })
         .where(eq(videos.muxUploadId, data.upload_id))                           // Se busca la fila en la tabla videos donde muxUploadId coincide con data.upload_id
       break;
+    }
+    case "video.asset.errored": {
+      const data = payload.data as VideoAssetErroredWebhookEvent["data"];
+    
+      if (!data.upload_id) {
+        return new Response("No upload ID found", { status: 400 })
+      }
+
+      await db
+        .update(videos)
+        .set({
+          muxStatus: data.status,
+        })
+        .where(eq(videos.muxUploadId, data.upload_id))
+      break;
+    }
+
+    case "video.asset.deleted": {
+      const data = payload.data as VideoAssetDeletedWebhookEvent["data"];
+
+      if (!data.upload_id) {
+        return new Response("No upload ID found", { status: 400 })
+      }
+
+      await db
+        .delete(videos)
+        .where(eq(videos.muxUploadId, data.upload_id))
     }
   }
 
