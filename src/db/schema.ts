@@ -1,7 +1,7 @@
 
 
 import { relations } from "drizzle-orm";
-import { pgTable, uuid, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, uniqueIndex, integer } from "drizzle-orm/pg-core";
 
 
 export const users = pgTable("users", {
@@ -40,6 +40,7 @@ export const videos = pgTable("videos", {
   muxTracStatus: text("mux_track_status"),
   thumbnailUrl: text("thumbnail_url"),
   previewUrl: text("preview_url"),
+  duration: integer("duration"),
   userId: uuid("user_id").references(() => users.id, {              // Referencia a la tabla `users` con el campo `id` ("user_id")
     onDelete: "cascade",
   }).notNull(), 
