@@ -77,14 +77,16 @@ export const POST = async(request: Request) => {
       }
 
       const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.png`   // Se crea una URL para obtener la miniatura del video
-    
+      const previewUrl = `https://image.mux.com/${playbackId}/animated.gif`      // Se crea una URL para obtener una vista previa animada del video
+
       await db                                                                   // Actualiza la base de datos con la información final del video 
         .update(videos)
         .set({
           muxStatus: data.status,                                                // Se actualiza con el estado actual del video ("ready").
           muxPlayBackId: playbackId,                                             // Se guarda el playbackId en la base de datos para reproducir el video en el frontend. 
           muxAssetId: data.id,                                                   // Se guarda el id del video en Mux.
-          thumbnailUrl                                                           // Se guarda la URL de la miniatura del video.
+          thumbnailUrl,                                                          // Se guarda la URL de la miniatura del video.
+          previewUrl                                                             // Se guarda la URL de la vista previa animada del video.
         })
         .where(eq(videos.muxUploadId, data.upload_id))                           // Se busca la fila en la tabla videos donde muxUploadId coincide con data.upload_id
       break;
