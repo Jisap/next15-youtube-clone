@@ -28,6 +28,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { videoUpdateSchema } from "@/db/schema";
+import { toast } from "sonner";
 
 interface FormSectionProps {
   videoId: string;
@@ -52,17 +53,28 @@ const FormSectionSkeleton = () => {
 
 const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   
+  const utils = trpc.useUtils();                                        // Hook para acceder a las utilidades de trpc.
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId }); // Petición desde el cliente usando la cache del server si existe, sino petición a la api.
   const [categories] = trpc.categories.getMany.useSuspenseQuery();      
 
+  const update = trpc.videos.update.useMutation({                       // Mutación para actualizar el video.
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();                                // Invalida la consulta de todos los videos del studio para actualizar el estado de la lista.
+      utils.studio.getOne.invalidate({ id: videoId });                  // Invalida la consulta del video específico para actualizar el estado del video.
+      toast.success("Video updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });                      
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
     defaultValues: video,
   });
 
-  const onSubmit = async(data: z.infer<typeof videoUpdateSchema>) => {  // Función que se ejecuta al enviar el formulario.
-    console.log(data);
+  const onSubmit = (data: z.infer<typeof videoUpdateSchema>) => {       // Función que se ejecuta al enviar el formulario.
+    update.mutateAsync(data);
   }
 
   return(
@@ -74,7 +86,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
             <h1 className="text-xs text-muted-foreground">Manage your video details</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Button type="submit" disabled={false}>
+            <Button type="submit" disabled={update.isPending}>
               Save
             </Button>
             <DropdownMenu>
