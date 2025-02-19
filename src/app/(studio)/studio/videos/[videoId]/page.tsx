@@ -13,6 +13,7 @@ const Page = async({ params }: PageProps) => {
   const { videoId } = await params;
 
   void trpc.studio.getOne.prefetch( { id: videoId } ); // Petición a la api para obtener el video -> almacenamiento en caché del server.
+  void trpc.categories.getMany.prefetch();             // Petición a la api para obtener las categorías -> almacenamiento en caché del server.
 
   return (
     <HydrateClient>
