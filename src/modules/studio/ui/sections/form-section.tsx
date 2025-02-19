@@ -21,11 +21,11 @@ import {
 } from "@/components/ui/select"
 
 import { MoreVerticalIcon, TrashIcon } from "lucide-react";
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
 import { videoUpdateSchema } from "@/db/schema";
 
@@ -54,39 +54,66 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId }); // Petición desde el cliente usando la cache del server si existe, sino petición a la api.
 
-  const form = useForm<z.infer<typeof videoUpdateSchema>>({
+  const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
     defaultValues: video,
   });
 
-  const onSubmit = async(data: z.infer<typeof videoUpdateSchema>) => {
+  const onSubmit = async(data: z.infer<typeof videoUpdateSchema>) => {  // Función que se ejecuta al enviar el formulario.
     console.log(data);
   }
 
   return(
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h1 className="text-2xl font-bold">Video details</h1>
-        <h1 className="text-xs text-muted-foreground">Manage your video details</h1>
-      </div>
-      <div className="flex items-center gap-2">
-        <Button type="submit" disabled={false}>
-          Save
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreVerticalIcon />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold">Video details</h1>
+            <h1 className="text-xs text-muted-foreground">Manage your video details</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button type="submit" disabled={false}>
+              Save
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <TrashIcon className="size-4 mr-2"/>
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVerticalIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <TrashIcon className="size-4 mr-2"/>
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="space-y-8 lg:col-span-3">
+            <FormField 
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Title
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      placeholder="Add a title to your video"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+      </form>
+    </Form>
   )
 }
