@@ -62,6 +62,24 @@ const VideosSectionSkeleton = () => {
                     </div>
                   </div>
                 </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20"/>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-16"/>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-24"/>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-4 w-12 ml-auto"/>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-4 w-12 ml-auto"/>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-4 w-12 ml-auto"/>
+                </TableCell>  
               </TableRow>
             ))}
           </TableBody>
