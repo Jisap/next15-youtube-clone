@@ -77,7 +77,7 @@ const VideosSectionSkeleton = () => {
                 <TableCell className="text-right">
                   <Skeleton className="h-4 w-12 ml-auto"/>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right pr-6">
                   <Skeleton className="h-4 w-12 ml-auto"/>
                 </TableCell>  
               </TableRow>
@@ -122,7 +122,7 @@ export const VideoSectionSuspense = () => {
                   return (
                   <Link href={`/studio/videos/${video.id}`} key={video.id} legacyBehavior>
                     <TableRow className="cursor-pointer">
-                      <TableCell>
+                      <TableCell className="pl-6">
                         <div className="flex items-center gap-4">
                           <div className="relative aspect-video w-36 shrink-0">
                             <VideoThumbnail 
@@ -156,13 +156,13 @@ export const VideoSectionSuspense = () => {
                       <TableCell className="text-sm truncate">
                         {format(new Date(video.createdAt), "d MMM yyyy")}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right text-sm">
                         views
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right text-sm">
                         Comments
                       </TableCell>
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-right  text-sm pr-6">
                         Likes
                       </TableCell>
                     </TableRow>
