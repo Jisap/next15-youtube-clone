@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 import Link from "next/link";
 import { snakeCaseToTitle } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface FormSectionProps {
   videoId: string;
@@ -56,6 +57,7 @@ const FormSectionSkeleton = () => {
 
 const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   
+  const router = useRouter();
   const utils = trpc.useUtils();                                        // Hook para acceder a las utilidades de trpc.
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId }); // Petición desde el cliente usando la cache del server si existe, sino petición a la api.
   const [categories] = trpc.categories.getMany.useSuspenseQuery();      
@@ -69,7 +71,18 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     onError: (error) => {
       toast.error(error.message);
     }
-  });                      
+  }); 
+  
+  const remove = trpc.videos.remove.useMutation({                       // Mutación para borrar el video.
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();                                // Invalida la consulta de todos los videos del studio para actualizar el estado de la lista.
+      toast.success("Video removed successfully");
+      router.push("/studio");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });    
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
@@ -110,7 +123,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => remove.mutate({ id: videoId })}>
                   <TrashIcon className="size-4 mr-2"/>
                   Delete
                 </DropdownMenuItem>
