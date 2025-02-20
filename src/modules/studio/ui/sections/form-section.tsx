@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   DropdownMenu,
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { CopyCheckIcon, CopyIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ import { z } from "zod";
 import { videoUpdateSchema } from "@/db/schema";
 import { toast } from "sonner";
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
+import Link from "next/link";
 
 interface FormSectionProps {
   videoId: string;
@@ -76,6 +77,17 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
   const onSubmit = (data: z.infer<typeof videoUpdateSchema>) => {       // Función que se ejecuta al enviar el formulario.
     update.mutateAsync(data);
+  }
+
+  const fullUrl = `${process.env.VERCEl_URL || "http:localhost:3000"}/videos/${videoId}`
+  const [isCopied, setIsCopied] = useState(false);
+
+  const onCopy = async() => {
+    await navigator.clipboard.writeText(fullUrl);
+    setIsCopied(true);
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
   }
 
   return(
@@ -189,6 +201,32 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   playbackId={video.muxPlayBackId}
                   thumbnailUrl={video.thumbnailUrl}
                 />
+              </div>
+              <div className="p-4 flex flex-col gap-y-6">
+                <div className="flex justify-between items-center gap-x-2">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="text-muted-foreground text-xs">
+                      Video link
+                    </p>
+                    <div className="flex items-center gap-x-2">
+                      <Link href={`/videos/${video.id}`}>
+                        <p className="line-clamp-1 text-sm text-blue-500">
+                          http://localhost:3000/123
+                        </p>
+                      </Link>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={onCopy}
+                        disabled={isCopied}
+                      >
+                        {isCopied ? <CopyCheckIcon /> : <CopyIcon className="size-4"/>}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
