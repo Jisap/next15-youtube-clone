@@ -211,7 +211,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <div className="flex items-center gap-x-2">
                       <Link href={`/videos/${video.id}`}>
                         <p className="line-clamp-1 text-sm text-blue-500">
-                          http://localhost:3000/123
+                          {fullUrl}
                         </p>
                       </Link>
                       <Button
