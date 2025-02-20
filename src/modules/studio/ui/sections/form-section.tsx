@@ -31,6 +31,7 @@ import { videoUpdateSchema } from "@/db/schema";
 import { toast } from "sonner";
 import { VideoPlayer } from "@/modules/videos/ui/components/video-player";
 import Link from "next/link";
+import { snakeCaseToTitle } from "@/lib/utils";
 
 interface FormSectionProps {
   videoId: string;
@@ -202,6 +203,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   thumbnailUrl={video.thumbnailUrl}
                 />
               </div>
+
               <div className="p-4 flex flex-col gap-y-6">
                 <div className="flex justify-between items-center gap-x-2">
                   <div className="flex flex-col gap-y-1">
@@ -227,6 +229,29 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     </div>
                   </div>
                 </div>
+
+              <div className="flex justify-between items-center ">
+                <div className="flex flex-col gap-y-1">
+                  <p className="text-muted-foreground text-xs">
+                    Video status
+                  </p>
+                  <p className="text-sm">
+                    {snakeCaseToTitle(video.muxStatus || "preparing")}
+                  </p>
+                </div>
+              </div>
+
+                <div className="flex justify-between items-center ">
+                  <div className="flex flex-col gap-y-1">
+                    <p className="text-muted-foreground text-xs">
+                      Subtitle status
+                    </p>
+                    <p className="text-sm">
+                      {snakeCaseToTitle(video.muxTrackStatus || "no_subtitles")}
+                    </p>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
