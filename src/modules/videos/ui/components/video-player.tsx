@@ -16,7 +16,7 @@ export const VideoPlayer = ({ playbackId, thumbnailUrl, autoPlay, onPlay }: Vide
   
   return (
     <MuxPlayer
-      playbackId={playbackId}
+      playbackId={playbackId || ""}
       poster={thumbnailUrl || "/placeholder.svg"}
       playerInitTime={0}
       autoPlay={autoPlay}
