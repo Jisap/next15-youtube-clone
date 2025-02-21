@@ -1,42 +1,49 @@
+import { db } from "@/db";
+import { users, videos } from "@/db/schema";
+import { auth } from "@clerk/nextjs/server";
+import { and, eq } from "drizzle-orm";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { z } from "zod";
 
-const f = createUploadthing();
+const f = createUploadthing();                                           // Crea una instancia de UploadThing.
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
 
-// FileRouter for your app, can contain multiple FileRoutes
-export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
-  imageUploader: f({
+export const ourFileRouter = {                                           // Definición del enrutador de archivos. Este contiene:                                             
+  thumbnailUploader: f({                                                 // 1º Configuración del uploader con la instancia de UploadThing
     image: {
-      /**
-       * For full list of options and defaults, see the File Route API reference
-       * @see https://docs.uploadthing.com/file-routes#route-config
-       */
       maxFileSize: "4MB",
       maxFileCount: 1,
     },
   })
-    // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
-      // This code runs on your server before upload
-      const user = await auth(req);
+    .input(z.object({                                                    // 2º Validación de la entrada: videoId
+      videoId: z.string().uuid(),
+     }))
+    .middleware(async ({ input }) => {                                   // 3º Middleware: Validación de usuario
+      const {userId: clerkUserId } = await auth();                       // Obtiene el userId de Clerk
+      if (!clerkUserId) throw new UploadThingError("Unauthorized");
 
-      // If you throw, the user will not be able to upload
-      if (!user) throw new UploadThingError("Unauthorized");
+      const [user] = await db                                            // Busca el usuario en la base de datos
+        .select()
+        .from(users)
+        .where(eq(users.clerkId, clerkUserId))
 
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id };
+      if(!user) throw new UploadThingError("Unauthorized");
+
+      return { user, ...input };                                         // Retorna el user junto con el videoId validado (metadata)
     })
-    .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+    .onUploadComplete(async ({ metadata, file }) => {                    // 4º Acción al completar la subida del file
+      await db                                                              // Actualiza la base de datos
+        .update(videos)                                                     // actualizando en la tabla videos la dirección de la imagen devuelta por UploadThing
+        .set({                                                               
+          thumbnailUrl: file.url,
+        })
+        .where(and(
+          eq(videos.id, metadata.videoId),                                  // donde el id del video de base de datos = el id validado por UploadThing
+          eq(videos.userId, metadata.user.id)                               // donde el userId del video de base de datos = el userId validado por UploadThing
+        ))
 
-      console.log("file url", file.url);
-
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      return { uploadedBy: metadata.user.id };
     }),
 } satisfies FileRouter;
 
