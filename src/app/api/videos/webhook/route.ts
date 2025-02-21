@@ -149,6 +149,7 @@ export const POST = async(request: Request) => {
         .where(eq(videos.muxAssetId, assetId))
       break;
     }
+
   }
 
   return new Response("Webhook received", {status: 200})

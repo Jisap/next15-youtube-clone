@@ -88,7 +88,18 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     onError: (error) => {
       toast.error(error.message);
     }
-  });    
+  });  
+  
+  const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({   // Mutación para restaurar la miniatura del video.
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();                                // Invalida la consulta de todos los videos del studio para actualizar el estado de la lista.
+      utils.studio.getOne.invalidate({ id: videoId });                  // Invalida la consulta del video específico para actualizar el estado del video.
+      toast.success("Video thumbnail restored successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });  
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
@@ -220,7 +231,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               <SparklesIcon className="size-4 mr-1" />
                               AI-generated
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => restoreThumbnail.mutate({ id: videoId })}>
                               <RotateCcwIcon className="size-4 mr-1" />
                               Restore
                             </DropdownMenuItem>
