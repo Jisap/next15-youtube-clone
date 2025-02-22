@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { videos } from "@/db/schema";
 import { serve } from "@upstash/workflow/nextjs"
 import { and, eq } from "drizzle-orm";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 
 interface InputType {
@@ -61,30 +62,42 @@ export const { POST } = serve(
     // console.log(body.content[0].text)
     // const title = body.content[0].text;
 
-    const { body } = await context.api.openai.call(
-      "generate-title",
-      {
-        baseURL: "https://api.deepseek.com",
-        token: process.env.DEEPSEEK_API_KEY!,
-        operation: "chat.completions.create",
-        body: {
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: TITLE_SYSTEM_PROMPT,
-            },
-            {
-              role: "user",
-              content: "User shouts back 'hi!'"
-            }
-          ],
-        },
-      }
-    );
+    // const { body } = await context.api.openai.call(
+    //   "generate-title",
+    //   {
+    //     baseURL: "https://api.deepseek.com",
+    //     token: process.env.DEEPSEEK_API_KEY!,
+    //     operation: "chat.completions.create",
+    //     body: {
+    //       model: "gpt-4o",
+    //       messages: [
+    //         {
+    //           role: "system",
+    //           content: TITLE_SYSTEM_PROMPT,
+    //         },
+    //         {
+    //           role: "user",
+    //           content: "User shouts back 'hi!'"
+    //         }
+    //       ],
+    //     },
+    //   }
+    // );
 
-    console.log(body.choices[0].message.content);
-    const title = body.choices[0].message.content;
+    // console.log(body.choices[0].message.content);
+    // const title = body.choices[0].message.content;
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!); 
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const prompt = `${TITLE_SYSTEM_PROMPT}\nUser shouts back 'hi!'`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    console.log(text);
+    const title = text;
+
 
     await context.run("update-video", async() => {
       await db
