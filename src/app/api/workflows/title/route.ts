@@ -40,6 +40,7 @@ export const { POST } = serve(
       return existingVideo;
     });
 
+    // Claude API
     // const { body } = await context.api.anthropic.call(
     //   "generate-title",
     //   {
@@ -58,7 +59,7 @@ export const { POST } = serve(
     //   }
     // );
 
-    // // get text:
+    // DeepSeek API
     // console.log(body.content[0].text)
     // const title = body.content[0].text;
 
@@ -87,6 +88,7 @@ export const { POST } = serve(
     // console.log(body.choices[0].message.content);
     // const title = body.choices[0].message.content;
 
+    // Google Generative AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!); 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
