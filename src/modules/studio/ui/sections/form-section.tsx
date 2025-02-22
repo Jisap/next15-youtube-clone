@@ -101,6 +101,16 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     }
   });  
 
+  const generateThumbnail = trpc.videos.generateThumbnail.useMutation({   // Mutación para generar la miniatura del video.
+    onSuccess: () => {
+     
+      toast.success("Background job started", {description: "This may take a few minutes to complete"});
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });  
+
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
     defaultValues: video,
@@ -207,7 +217,8 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                     <FormControl>
                       <div className="p-0.5 border border-dashed border-neutral-400 relative h-[84px] w-[153px] group">
                         <Image 
-                          src={video.thumbnailUrl ?? THUMBNAIL_FALLBACK}
+                          src={video.thumbnailUrl || THUMBNAIL_FALLBACK}
+                          //src="/placeholder.svg"
                           className="object-cover"
                           fill
                           alt="Thumbnail"
@@ -227,7 +238,8 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               <ImagePlusIcon className="size-4 mr-1" />
                               Change
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            {/* form-section -> procedures -> workflow -> route */}
+                            <DropdownMenuItem onClick={() => generateThumbnail.mutate()}>
                               <SparklesIcon className="size-4 mr-1" />
                               AI-generated
                             </DropdownMenuItem>

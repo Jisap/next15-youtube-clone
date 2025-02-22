@@ -26,6 +26,7 @@ export const ThumbnailUploadModal = ({ videoId, open, onOpenChange }: ThumbnailU
       title="Upload Thumbnail"
     >
       <UploadDropzone
+        // thumbnailUploader viene de la configuración de nuestro router de archivos en src/app/api/uploadthing/core.ts
         endpoint="thumbnailUploader"
         input={{ videoId }}
         onClientUploadComplete={onUploadComplete}

@@ -5,7 +5,6 @@ import MuxUploader,{
   MuxUploaderStatus,
 } from "@mux/mux-uploader-react"
 import { UploadIcon } from "lucide-react";
-import { mux } from '../../../../lib/mux';
 import { Button } from "@/components/ui/button";
 
 

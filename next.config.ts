@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",  // Asegúrate de que el protocolo sea "https"
-        hostname: "utfs.io"
+        hostname: "utfs.io",
       }
     ]
   }
