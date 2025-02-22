@@ -39,27 +39,52 @@ export const { POST } = serve(
       return existingVideo;
     });
 
-    const { body } = await context.api.anthropic.call(
+    // const { body } = await context.api.anthropic.call(
+    //   "generate-title",
+    //   {
+    //     token: process.env.CLAUDE_API_KEY!,
+    //     operation: "messages.create",
+    //     body: {
+    //       model: "claude-3-5-sonnet-20241022",
+    //       max_tokens: 1024,
+    //       messages: [
+    //         { 
+    //           "role": "user", 
+    //           "content": TITLE_SYSTEM_PROMPT  
+    //         }
+    //       ]
+    //     },
+    //   }
+    // );
+
+    // // get text:
+    // console.log(body.content[0].text)
+    // const title = body.content[0].text;
+
+    const { body } = await context.api.openai.call(
       "generate-title",
       {
-        token: process.env.CLAUDE_API_KEY!,
-        operation: "messages.create",
+        baseURL: "https://api.deepseek.com",
+        token: process.env.DEEPSEEK_API_KEY!,
+        operation: "chat.completions.create",
         body: {
-          model: "claude-3-5-sonnet-20241022",
-          max_tokens: 1024,
+          model: "gpt-4o",
           messages: [
-            { 
-              "role": "user", 
-              "content": TITLE_SYSTEM_PROMPT  
+            {
+              role: "system",
+              content: TITLE_SYSTEM_PROMPT,
+            },
+            {
+              role: "user",
+              content: "User shouts back 'hi!'"
             }
-          ]
+          ],
         },
       }
     );
 
-    // get text:
-    console.log(body.content[0].text)
-    const title = body.content[0].text;
+    console.log(body.choices[0].message.content);
+    const title = body.choices[0].message.content;
 
     await context.run("update-video", async() => {
       await db
