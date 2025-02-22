@@ -13,11 +13,12 @@ import { workflow } from "@/lib/workflow";
 
 export const videosRouter = createTRPCRouter({
   generateThumbnail: protectedProcedure
-    .mutation(async({ ctx }) => {
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async({ ctx, input }) => {
       const { id: userId } = ctx.user;
-      const { workflowRunId } =await workflow.trigger({
+      const { workflowRunId } = await workflow.trigger({
         url: `${process.env.UPSTASH_WORKFLOW_URL}/api/workflows/title`,
-        body: `Soy el cuerpo del workflow con el userId: ${userId}`,
+        body: { userId, videoId: input.id }
       })
       return { workflowRunId }
     }),
