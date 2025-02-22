@@ -11,6 +11,14 @@ interface InputType {
   videoId: string;
 }
 
+const TITLE_SYSTEM_PROMPT = `Your task is to generate an SEO-focused title for a YouTube video based on its transcript. Please follow these guidelines:
+- Be concise but descriptive, using relevant keywords to improve discoverability.
+- Highlight the most compelling or unique aspect of the video content.
+- Avoid jargon or overly complex language unless it directly supports searchability.
+- Use action-oriented phrasing or clear value propositions where applicable.
+- Ensure the title is 3-8 words long and no more than 100 characters.
+- ONLY return the title as plain text. Do not add quotes or any additional formatting.`;
+
 export const { POST } = serve(
   async (context) => {
 
@@ -31,11 +39,33 @@ export const { POST } = serve(
       return existingVideo;
     });
 
+    const { body } = await context.api.anthropic.call(
+      "generate-title",
+      {
+        token: process.env.CLAUDE_API_KEY!,
+        operation: "messages.create",
+        body: {
+          model: "claude-3-5-sonnet-20241022",
+          max_tokens: 1024,
+          messages: [
+            { 
+              "role": "user", 
+              "content": TITLE_SYSTEM_PROMPT  
+            }
+          ]
+        },
+      }
+    );
+
+    // get text:
+    console.log(body.content[0].text)
+    const title = body.content[0].text;
+
     await context.run("update-video", async() => {
       await db
         .update(videos)
         .set({
-          title: "Update from background job",
+          title: title || video.title,
         })
         .where(and(
           eq(videos.id, video.id),
