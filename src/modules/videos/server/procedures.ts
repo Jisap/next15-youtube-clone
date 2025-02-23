@@ -137,8 +137,8 @@ export const videosRouter = createTRPCRouter({
           {
             generated_subtitles: [
               {
-                language_code: "es",
-                name: "Spanish",
+                language_code: "en",
+                name: "English",
               }
             ]
           }

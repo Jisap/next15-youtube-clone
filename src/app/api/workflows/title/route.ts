@@ -40,6 +40,16 @@ export const { POST } = serve(
       return existingVideo;
     });
 
+    const transcript = await context.run("get-transcript", async() => {
+      const trackUrl = `https://stream.mux.com/${video.muxPlayBackId}/text/${video.muxTrackId}.txt`
+      const response = await fetch(trackUrl)
+      const text = response.text();
+      if(!text){
+        throw new Error("Bad request")
+      }
+      return text
+    })
+
     // Claude API
     // const { body } = await context.api.anthropic.call(
     //   "generate-title",
@@ -91,7 +101,7 @@ export const { POST } = serve(
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!); 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `${TITLE_SYSTEM_PROMPT}\nContenido del video: ${video.description}'`;
+    const prompt = `${TITLE_SYSTEM_PROMPT}\nTranscript: ${transcript}'`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
