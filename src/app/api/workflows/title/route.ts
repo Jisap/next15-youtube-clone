@@ -101,13 +101,17 @@ export const { POST } = serve(
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!); 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `${TITLE_SYSTEM_PROMPT}\nTranscript: ${transcript}'`;
+    const prompt = `${TITLE_SYSTEM_PROMPT}\nTranscript: ${transcript}\nVideo description: ${video.description}'`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
     const title = text;
-    console.log("text",text)
+    console.log("text",text);
+
+    if(!title){
+      throw new Error("Bad request")
+    }
 
 
     await context.run("update-video", async() => {
