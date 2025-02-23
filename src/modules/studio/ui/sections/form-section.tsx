@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { CopyCheckIcon, CopyIcon, Globe2Icon, ImagePlusIcon, LockIcon, MoreVerticalIcon, RotateCcwIcon, SparklesIcon, TrashIcon } from "lucide-react";
+import { CopyCheckIcon, CopyIcon, Globe2Icon, ImagePlusIcon, Loader2Icon, LockIcon, MoreVerticalIcon, RotateCcwIcon, SparklesIcon, TrashIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -101,15 +101,32 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     }
   });  
 
-  const generateThumbnail = trpc.videos.generateThumbnail.useMutation({   // Mutación para generar la miniatura del video.
+  const generateDescription = trpc.videos.generateDescription.useMutation({   // Mutación para generar la miniatura del video.
     onSuccess: () => {
-     
+      toast.success("Background job started", { description: "This may take a few minutes to complete" });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  }); 
+
+  const generateTitle = trpc.videos.generateTitle.useMutation({   // Mutación para generar la miniatura del video.
+    onSuccess: () => { 
       toast.success("Background job started", {description: "This may take a few minutes to complete"});
     },
     onError: (error) => {
       toast.error(error.message);
     }
-  });  
+  }); 
+  
+  const generateThumbnail = trpc.videos.generateThumbnail.useMutation({   // Mutación para generar la miniatura del video.
+    onSuccess: () => {
+      toast.success("Background job started", { description: "This may take a few minutes to complete" });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  }); 
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
@@ -173,7 +190,22 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Title
+                      <div className="flex items-center gap-x-2">
+                        Title
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          type="button"
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          onClick={() => generateTitle.mutate({ id: videoId })}
+                          disabled={generateTitle.isPending}
+                        >
+                          {generateTitle.isPending 
+                            ? <Loader2Icon className="animate-spin" />
+                            : <SparklesIcon />
+                          }  
+                        </Button>
+                      </div>
                     </FormLabel>
                     <FormControl>
                       <Input 
@@ -191,7 +223,22 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Description
+                      <div className="flex items-center gap-x-2">
+                        Description
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          type="button"
+                          className="rounded-full size-6 [&_svg]:size-3"
+                          onClick={() => generateDescription.mutate({ id: videoId })}
+                          disabled={generateDescription.isPending}
+                        >
+                          {generateDescription.isPending
+                            ? <Loader2Icon className="animate-spin" />
+                            : <SparklesIcon />
+                          }
+                        </Button>
+                      </div>
                     </FormLabel>
                     <FormControl>
                       <Textarea
