@@ -87,7 +87,12 @@ export const ThumbnailGenerateModal = ({ videoId, open, onOpenChange }: Thumbnai
           )}
         />
         <div className="flex justify-end">
-          <Button type="submit">Generate Thumbnail</Button>
+          <Button 
+            type="submit"
+            disabled={generateThumbnail.isPending}
+          >
+            Generate Thumbnail
+          </Button>
         </div>
       </form>
      </Form>
