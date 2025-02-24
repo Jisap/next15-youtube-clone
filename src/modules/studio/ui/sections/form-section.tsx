@@ -215,7 +215,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
               <h1 className="text-xs text-muted-foreground">Manage your video details</h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button type="submit" disabled={update.isPending}>
+              <Button type="submit" disabled={update.isPending || !form.formState.isDirty}>
                 Save
               </Button>
               <DropdownMenu>
@@ -234,7 +234,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <div className="space-y-8 lg:col-span-3">
               <FormField 
                 control={form.control} //control es la ref de react-hook-form que usa para gestionar el estado de los campos del formulario
