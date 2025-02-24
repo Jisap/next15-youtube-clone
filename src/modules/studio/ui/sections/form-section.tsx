@@ -37,7 +37,7 @@ import Image from "next/image";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/types";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
 import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
-import { set } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormSectionProps {
   videoId: string;
@@ -55,7 +55,35 @@ export const FormSection = ({ videoId }: FormSectionProps) => {
 
 const FormSectionSkeleton = () => {
   return (
-    <p>Loading...</p>
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+        <Skeleton className="h-9 w-24" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="space-y-8 lg:col-span-3">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-[220px] w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-[84px] w-[153px]" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
