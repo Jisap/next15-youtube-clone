@@ -36,6 +36,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/types";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
+import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
+import { set } from "date-fns";
 
 interface FormSectionProps {
   videoId: string;
@@ -64,6 +66,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
   const utils = trpc.useUtils();                                        // Hook para acceder a las utilidades de trpc.
   
   const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+  const [thumbnailGenerateModalOpen, setThumbnailGenerateModalOpen] = useState(false);
 
   const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId }); // Petición desde el cliente usando la cache del server si existe, sino petición a la api.
   const [categories] = trpc.categories.getMany.useSuspenseQuery();      
@@ -119,14 +122,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     }
   }); 
   
-  const generateThumbnail = trpc.videos.generateThumbnail.useMutation({   // Mutación para generar la miniatura del video.
-    onSuccess: () => {
-      toast.success("Background job started", { description: "This may take a few minutes to complete" });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    }
-  }); 
+ 
 
   const form = useForm<z.infer<typeof videoUpdateSchema>>({             // Se inicializa el hook useForm con el esquema de validación videoUpdateSchema y los valores por defecto del video. 
     resolver: zodResolver(videoUpdateSchema),
@@ -150,6 +146,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
   return(
     <>
+      <ThumbnailGenerateModal
+        open={thumbnailGenerateModalOpen}
+        onOpenChange={setThumbnailGenerateModalOpen}
+        videoId={videoId}
+      />
       <ThumbnailUploadModal
         open={thumbnailModalOpen}
         onOpenChange={setThumbnailModalOpen}
@@ -285,11 +286,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                               <ImagePlusIcon className="size-4 mr-1" />
                               Change
                             </DropdownMenuItem>
-                            {/* form-section -> procedures -> workflow -> route */}
-                            <DropdownMenuItem onClick={() => generateThumbnail.mutate({ id: videoId })}>
+                            <DropdownMenuItem onClick={() => setThumbnailGenerateModalOpen(true)}>
                               <SparklesIcon className="size-4 mr-1" />
                               AI-generated
                             </DropdownMenuItem>
+                            {/* form-section -> procedures -> workflow -> route */}
                             <DropdownMenuItem onClick={() => restoreThumbnail.mutate({ id: videoId })}>
                               <RotateCcwIcon className="size-4 mr-1" />
                               Restore
