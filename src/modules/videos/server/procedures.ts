@@ -1,13 +1,14 @@
 import { db } from "@/db";
-import { videos } from "@/db/schema";
+import { users, videos } from "@/db/schema";
 import { mux } from "@/lib/mux";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
-import { and, eq } from "drizzle-orm";
+import { and, eq, getTableColumns } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
 import { workflow } from "@/lib/workflow";
+import { title } from "process";
 
 
 
@@ -16,11 +17,15 @@ export const videosRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const [existingVideo] = await db
-        .select()
+        .select({
+          ...getTableColumns(videos),
+          user: {
+            ...getTableColumns(users),
+          }
+        })
         .from(videos)
-        .where(and(
-          eq(videos.id, input.id),
-        ));
+        .innerJoin(users, eq(videos.userId, users.id)) // Añade la relación de usuario correspondiente al creador del video
+        .where(and(eq(videos.id, input.id)))
 
       if(!existingVideo){
         throw new TRPCError({ code: "NOT_FOUND" })
