@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { videos } from "@/db/schema";
 import { mux } from "@/lib/mux";
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
+import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
 import { and, eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -12,6 +12,22 @@ import { workflow } from "@/lib/workflow";
 
 
 export const videosRouter = createTRPCRouter({
+  getOne: baseProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(and(
+          eq(videos.id, input.id),
+        ));
+
+      if(!existingVideo){
+        throw new TRPCError({ code: "NOT_FOUND" })
+      }
+
+      return existingVideo
+    }),
   generateDescription: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
