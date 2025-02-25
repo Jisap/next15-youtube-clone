@@ -102,7 +102,7 @@ export const { POST } = serve(
 
     // Google Generative AI
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!); 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-002" });
 
     const prompt = `${DESCRIPTION_SYSTEM_PROMPT}\nTranscript: ${transcript}}'`;
     const result = await model.generateContent(prompt);
