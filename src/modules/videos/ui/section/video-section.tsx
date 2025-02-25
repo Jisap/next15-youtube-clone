@@ -1,8 +1,32 @@
+"use client"
+
+import { trpc } from '@/trpc/client';
+import { Suspense } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 
-const VideoSection = () => {
+interface VideoSectionProps {
+  videoId: string
+}
+
+const VideoSection = ({ videoId }: VideoSectionProps) => {
   return (
-    <div>VideoSection</div>
+    <Suspense fallback={<p>Loading...</p>}>
+      <ErrorBoundary fallback={<p>Error...</p>}>
+        <VideoSectionSuspense videoId={videoId} />
+      </ErrorBoundary>
+    </Suspense>
+  )
+}
+
+const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
+  
+  const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
+  console.log("video", video);
+  return (
+    <div>
+      {JSON.stringify(video)}
+    </div>
   )
 }
 
