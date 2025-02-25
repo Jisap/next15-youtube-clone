@@ -15,7 +15,7 @@ import { title } from "process";
 export const videosRouter = createTRPCRouter({
   getOne: baseProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const [existingVideo] = await db
         .select({
           ...getTableColumns(videos),
