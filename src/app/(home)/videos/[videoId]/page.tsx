@@ -18,7 +18,7 @@ const Page = async({ params }: PageProps) => {
 
   return (
     <HydrateClient>
-      <VideoView />
+      <VideoView videoId={videoId} />
     </HydrateClient>
   )
 }
