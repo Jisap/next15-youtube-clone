@@ -21,7 +21,8 @@ export const videosRouter = createTRPCRouter({
           ...getTableColumns(videos),
           user: {
             ...getTableColumns(users),
-          }
+          },
+       
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id)) // Añade la relación de usuario correspondiente al creador del video
