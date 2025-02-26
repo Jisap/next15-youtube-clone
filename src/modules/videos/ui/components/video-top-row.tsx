@@ -13,13 +13,13 @@ interface VideoTopRowProps {
 
 export const VideoTopRow = ({ video }: VideoTopRowProps) => {
 
-  const compactViews = useMemo(() => {  // 
+  const compactViews = useMemo(() => {  // TODO: Actualizar dinámicamente los valores 
     return Intl.NumberFormat("en", {
       notation: "compact"
     }).format(1145567)
   },[]);
 
-  const expandedViews = useMemo(() => {  // 
+  const expandedViews = useMemo(() => {  // TODO: Actualizar dinámicamente los valores
     return Intl.NumberFormat("en", {
       notation: "standard"
     }).format(1145567)
