@@ -1,4 +1,5 @@
 import { VideoGetOneOutput } from "../../types"
+import VideoDescription from "./video-description"
 import VideoMenu from "./video-menu"
 import { VideoOwner } from "./video-owner"
 import VideoReactions from "./video-reactions"
@@ -25,6 +26,13 @@ export const VideoTopRow = ({ video }: VideoTopRowProps) => {
           />
         </div>
       </div>
+      <VideoDescription 
+        compactViews="1.5k"
+        expandedViews="1,523"
+        compactDate="22/22/22"
+        expandedDate="12th Jan 2025"
+        description={video.description}
+      />
     </div>
   )
 }
