@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import { ListPlusIcon, MoreVertical, ShareIcon, Trash2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 interface VideoMenuProps {
   videoId: string;
@@ -18,6 +19,12 @@ const VideoMenu = ({
   variant,
   onRemove
  }: VideoMenuProps) => {
+
+  const onShare = () => {
+    const fullUrl = `${process.env.VERCEL_URL || "http://localhost:3000"}/videos/${videoId}`;
+    navigator.clipboard.writeText(fullUrl);
+    toast.success("Copied to clipboard");
+  }
 
   return (
     <DropdownMenu>
@@ -34,7 +41,7 @@ const VideoMenu = ({
         align="end" 
         onClick={(e) => e.stopPropagation()}
       >
-        <DropdownMenuItem onClick={() => {}}>
+        <DropdownMenuItem onClick={() => onShare()}>
           <ShareIcon className="mr-2 size-4" />
           Share
         </DropdownMenuItem>
