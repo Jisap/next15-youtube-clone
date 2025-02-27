@@ -4,12 +4,8 @@ import { db } from "@/db";
 import { videos } from "@/db/schema";
 import { serve } from "@upstash/workflow/nextjs"
 import { and, eq } from "drizzle-orm";
-import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 import { UTApi } from "uploadthing/server";
-import path from "path";
-import os from "os";
-import fs from "fs/promises";
-import * as stability from "stability-client";
+
 
 interface InputType {
   userId: string;
@@ -98,5 +94,4 @@ export const { POST } = serve(
       })
 
     })
-
   })

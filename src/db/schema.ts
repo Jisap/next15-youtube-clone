@@ -1,7 +1,8 @@
 
 
 import { relations } from "drizzle-orm";
-import { pgTable, uuid, text, timestamp, uniqueIndex, integer, pgEnum } from "drizzle-orm/pg-core";
+
+import { pgTable, uuid, text, timestamp, uniqueIndex, integer, pgEnum, primaryKey } from "drizzle-orm/pg-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -21,7 +22,8 @@ export const users = pgTable("users", {
 // Este índice garantiza que no haya duplicados en la columna `clerkId` y mejora el rendimiento de las consultas que filtran por `clerkId`
 
 export const userRelations = relations(users, ({many}) => ({       // Cada user tiene muchos videos
-  video: many(videos)
+  video: many(videos),
+  videoViews: many(videoViews)
 }))
 
 export const categories = pgTable("categories", {
@@ -81,3 +83,32 @@ export const videoRelations = relations(videos, ({ one }) => ({     // Relacione
 export const categoryRelations = relations(categories, ({ many }) => ({
   videos: many(videos)
 }));
+
+
+export const videoViews = pgTable("video_views", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [
+  primaryKey ({
+    name: "video_views_pk",
+    columns: [t.userId, t.videoId]
+  }),
+])
+
+export const videoViewRelations = relations(videoViews, ({ one, many }) => ({ // Relaciones para la tabla video_views
+  users: one(users, {                                                         // Relación "muchos" a "uno" con la tabla users
+    fields: [videoViews.userId],                                              // Cada fila en videoViews tiene un userId que apunta a un id en la tabla users.
+    references: [users.id],                                                   // Cada userId de videoViews apunta a un id en la tabla users.
+  }),
+  videos: one(videos, {                                                       // Relación "muchos" a "uno" con la tabla videos
+    fields: [videoViews.videoId],                                             // Cada fila en videoViews tiene un videoId que apunta a un id en la tabla videos.
+    references: [videos.id],                                                  // Cada videoId de videoViews apunta a un id en la tabla videos.
+  }),
+  views: many(videoViews) 
+}));
+
+export const videoViewSelectSchema = createSelectSchema(videoViews);          // Esquema de validación para leer datos de la tabla videoViews.
+export const videoViewInsertSchema = createInsertSchema(videoViews);          // Esquema de validación para insertar datos en la tabla videoViews.
+export const videoViewUpdateSchema = createUpdateSchema(videoViews);          // Esquema de validación para actualizar datos en la tabla videoViews.
