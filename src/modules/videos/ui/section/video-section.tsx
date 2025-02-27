@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { VideoPlayer } from '../components/video-player';
 import { VideoBanner } from '../components/video-banner';
 import { VideoTopRow } from '../components/video-top-row';
+import { useAuth } from '@clerk/nextjs';
 
 
 
@@ -26,7 +27,21 @@ const VideoSection = ({ videoId }: VideoSectionProps) => {
 
 const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
   
-  const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });
+  const { isSignedIn } = useAuth();
+
+  const utils = trpc.useUtils();
+  const [video] = trpc.videos.getOne.useSuspenseQuery({ id: videoId });     // Obtiene el video con el id especificado
+
+  const createView = trpc.videoViews.create.useMutation({                   // Obtiene la mutación para crear una nueva visualización del video
+    onSuccess: () => {                                                      // Si tiene éxito, se invalida la consulta para obtener el video actualizado
+      utils.videos.getOne.invalidate({ id: videoId });                      // Invalida la consulta para obtener el video actualizado
+    }                                                      
+  });                  
+
+  const handlePlay = () => {                                                // Cuando se reproduce el video,
+    if(!isSignedIn) return;                                                 // si el usuario esta autenticado
+    createView.mutate({ videoId });                                         // se aplica la mutación y se crea una nueva visualización del video
+  }
  
   return (
    <>
@@ -36,7 +51,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
       )}>
         <VideoPlayer 
           autoPlay
-          onPlay={() => {}}
+          onPlay={handlePlay}
           playbackId={video.muxPlayBackId}
           thumbnailUrl={video.thumbnailUrl}
         />

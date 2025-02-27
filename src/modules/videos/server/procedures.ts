@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users, videos } from "@/db/schema";
+import { users, videos, videoViews } from "@/db/schema";
 import { mux } from "@/lib/mux";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
@@ -22,7 +22,7 @@ export const videosRouter = createTRPCRouter({
           user: {
             ...getTableColumns(users),
           },
-       
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id))
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id)) // Añade la relación de usuario correspondiente al creador del video

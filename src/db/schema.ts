@@ -85,9 +85,9 @@ export const categoryRelations = relations(categories, ({ many }) => ({
 }));
 
 
-export const videoViews = pgTable("video_views", {
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
+export const videoViews = pgTable("video_views", {                                              // La tabla video_views no almacena un campo llamado video_views explícitamente.
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),        // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),     // La relación entre userId y videoId permite rastrear quién ha visto qué.
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [

@@ -13,17 +13,17 @@ interface VideoTopRowProps {
 
 export const VideoTopRow = ({ video }: VideoTopRowProps) => {
 
-  const compactViews = useMemo(() => {  // TODO: Actualizar dinámicamente los valores 
+  const compactViews = useMemo(() => {  
     return Intl.NumberFormat("en", {
       notation: "compact"
-    }).format(1145567)
-  },[]);
+    }).format(video.viewCount)
+  },[video.viewCount]);
 
-  const expandedViews = useMemo(() => {  // TODO: Actualizar dinámicamente los valores
+  const expandedViews = useMemo(() => {  
     return Intl.NumberFormat("en", {
       notation: "standard"
-    }).format(1145567)
-  }, []);
+    }).format(video.viewCount)
+  }, [video.viewCount]);
 
   const compactDate = useMemo(() => { 
     return formatDistanceToNow(video.createdAt, { addSuffix: true })
