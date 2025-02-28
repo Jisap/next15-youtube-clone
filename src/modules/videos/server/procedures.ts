@@ -71,7 +71,7 @@ export const videosRouter = createTRPCRouter({
         // .groupBy(
         //   videos.id,
         //   users.id,
-        //   viewerReactions.type                                                    //  Combina todas las filas que tienen el mismo videos.id, users.id y viewerReactions.type en un solo grupo.  
+        //   viewerReactions.type                                                 //  Combina todas las filas que tienen el mismo videos.id, users.id y viewerReactions.type en un solo grupo.  
         // )
 
       if(!existingVideo){
