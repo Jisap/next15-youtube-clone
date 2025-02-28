@@ -23,7 +23,8 @@ export const users = pgTable("users", {
 
 export const userRelations = relations(users, ({many}) => ({       // Cada user tiene muchos videos
   video: many(videos),
-  videoViews: many(videoViews)
+  videoViews: many(videoViews),
+  videoReactions: many(videoReactions)
 }))
 
 export const categories = pgTable("categories", {
@@ -55,7 +56,7 @@ export const videos = pgTable("videos", {
   previewKey: text("preview_key"),
   duration: integer("duration").default(0).notNull(),
   visibility: videoVisibility("visibility").default("private").notNull(),
-  userId: uuid("user_id").references(() => users.id, {              // Referencia a la tabla `users` con el campo `id` ("user_id")
+  userId: uuid("user_id").references(() => users.id, {                                       // Referencia a la tabla `users` con el campo `id` ("user_id")
     onDelete: "cascade",
   }).notNull(), 
   categoryId: uuid("category_id").references(() => categories.id, {
@@ -65,19 +66,21 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const videoInsertSchema = createInsertSchema(videos);        // Genera un esquema de validación que se usa para insertar nuevos registros en la tabla videos.
-export const videoUpdateSchema = createUpdateSchema(videos);        // Crea un esquema de validación para actualizar registros en la tabla videos.
-export const videoSelectSchema = createSelectSchema(videos);        // Define un esquema de validación para seleccionar registros de la tabla videos.
+export const videoInsertSchema = createInsertSchema(videos);                                  // Genera un esquema de validación que se usa para insertar nuevos registros en la tabla videos.
+export const videoUpdateSchema = createUpdateSchema(videos);                                  // Crea un esquema de validación para actualizar registros en la tabla videos.
+export const videoSelectSchema = createSelectSchema(videos);                                  // Define un esquema de validación para seleccionar registros de la tabla videos.
 
-export const videoRelations = relations(videos, ({ one }) => ({     // Relaciones entre las tablas (Cada video tiene un usuario)
-  user: one(users, {                                                // Relación 1-1 con la tabla `users`
-    fields: [videos.userId],                                        // Drizzle ORM necesita relations() para entender cómo conectar los datos a nivel de consultas. 
-    references: [users.id],                                         // De esta manera se define que, al hacer una consulta de videos,   
-  }),                                                               // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
+export const videoRelations = relations(videos, ({ one, many }) => ({                               // Relaciones entre las tablas (Cada video tiene un usuario)
+  user: one(users, {                                                                          // Relación 1-1 con la tabla `users`
+    fields: [videos.userId],                                                                  // Drizzle ORM necesita relations() para entender cómo conectar los datos a nivel de consultas. 
+    references: [users.id],                                                                   // De esta manera se define que, al hacer una consulta de videos,   
+  }),                                                                                         // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
   category: one(categories, {
     fields: [videos.categoryId],
     references: [categories.id],
-  })
+  }),
+  views: many(videoViews),
+  reactions: many(videoReactions)
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
@@ -97,18 +100,49 @@ export const videoViews = pgTable("video_views", {                              
   }),
 ])
 
-export const videoViewRelations = relations(videoViews, ({ one, many }) => ({ // Relaciones para la tabla video_views
-  users: one(users, {                                                         // Relación "muchos" a "uno" con la tabla users
-    fields: [videoViews.userId],                                              // Cada fila en videoViews tiene un userId que apunta a un id en la tabla users.
-    references: [users.id],                                                   // Cada userId de videoViews apunta a un id en la tabla users.
+export const videoViewRelations = relations(videoViews, ({ one, many }) => ({                    // Relaciones para la tabla video_views
+  users: one(users, {                                                                            // Relación "muchos" a "uno" con la tabla users
+    fields: [videoViews.userId],                                                                 // Cada fila en videoViews tiene un userId que apunta a un id en la tabla users.
+    references: [users.id],                                                                      // Cada userId de videoViews apunta a un id en la tabla users.
   }),
-  videos: one(videos, {                                                       // Relación "muchos" a "uno" con la tabla videos
-    fields: [videoViews.videoId],                                             // Cada fila en videoViews tiene un videoId que apunta a un id en la tabla videos.
-    references: [videos.id],                                                  // Cada videoId de videoViews apunta a un id en la tabla videos.
+  videos: one(videos, {                                                                          // Relación "muchos" a "uno" con la tabla videos
+    fields: [videoViews.videoId],                                                                // Cada fila en videoViews tiene un videoId que apunta a un id en la tabla videos.
+    references: [videos.id],                                                                     // Cada videoId de videoViews apunta a un id en la tabla videos.
   }),
   views: many(videoViews) 
 }));
 
-export const videoViewSelectSchema = createSelectSchema(videoViews);          // Esquema de validación para leer datos de la tabla videoViews.
-export const videoViewInsertSchema = createInsertSchema(videoViews);          // Esquema de validación para insertar datos en la tabla videoViews.
-export const videoViewUpdateSchema = createUpdateSchema(videoViews);          // Esquema de validación para actualizar datos en la tabla videoViews.
+export const videoViewSelectSchema = createSelectSchema(videoViews);                             // Esquema de validación para leer datos de la tabla videoViews.
+export const videoViewInsertSchema = createInsertSchema(videoViews);                             // Esquema de validación para insertar datos en la tabla videoViews.
+export const videoViewUpdateSchema = createUpdateSchema(videoViews);                             // Esquema de validación para actualizar datos en la tabla videoViews.
+
+
+export const reactionType = pgEnum("reaction_type", ["like", "dislike"])
+
+export const videoReactions = pgTable("video_reactions", {                                       // La tabla video_reactions no almacena un campo llamado video_reactions explícitamente.
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),         // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),      // La relación entre userId y videoId permite rastrear quién ha visto qué.
+  type: reactionType("type").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [
+  primaryKey({
+    name: "video_reactions_pk",
+    columns: [t.userId, t.videoId]
+  }),
+]);
+
+export const videoReactionRelations = relations(videoReactions, ({ one, many }) => ({            // Relaciones para la tabla video_reactions
+  users: one(users, {                                                                            // Relación "muchos" a "uno" con la tabla users
+    fields: [videoReactions.userId],                                                             // Cada fila en video_reactions tiene un userId que apunta a un id en la tabla users.
+    references: [users.id],                                                                      // Cada userId de video_reactions apunta a un id en la tabla users.
+  }),
+  videos: one(videos, {                                                                          // Relación "muchos" a "uno" con la tabla videos
+    fields: [videoReactions.videoId],                                                            // Cada fila en video_reactions tiene un videoId que apunta a un id en la tabla videos.
+    references: [videos.id],                                                                     // Cada videoId de video_reactions apunta a un id en la tabla videos.
+  }),
+}));
+
+export const videoReactionSelectSchema = createSelectSchema(videoReactions);                     // Esquema de validación para leer datos de la tabla video_reactions.
+export const videoReactionInsertSchema = createInsertSchema(videoReactions);                     // Esquema de validación para insertar datos en la tabla video_reactions.
+export const videoReactionUpdateSchema = createUpdateSchema(videoReactions); 

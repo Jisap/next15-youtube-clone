@@ -34,7 +34,7 @@ const VideoSectionSuspense = ({ videoId }: VideoSectionProps) => {
 
   const createView = trpc.videoViews.create.useMutation({                   // Obtiene la mutación para crear una nueva visualización del video
     onSuccess: () => {                                                      // Si tiene éxito, se invalida la consulta para obtener el video actualizado
-      utils.videos.getOne.invalidate({ id: videoId });                      // Invalida la consulta para obtener el video actualizado
+      utils.videos.getOne.invalidate({ id: videoId });                      
     }                                                      
   });                  
 
