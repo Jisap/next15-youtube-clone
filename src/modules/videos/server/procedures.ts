@@ -68,11 +68,11 @@ export const videosRouter = createTRPCRouter({
         .innerJoin(users, eq(videos.userId, users.id))                            // Añade la relación de usuario correspondiente al creador del video
         .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))        // (*) Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
         .where(and(eq(videos.id, input.id)))
-        .groupBy(
-          videos.id,
-          users.id,
-          viewerReactions.type
-        )
+        // .groupBy(
+        //   videos.id,
+        //   users.id,
+        //   viewerReactions.type                                                    //  Combina todas las filas que tienen el mismo videos.id, users.id y viewerReactions.type en un solo grupo.  
+        // )
 
       if(!existingVideo){
         throw new TRPCError({ code: "NOT_FOUND" })
