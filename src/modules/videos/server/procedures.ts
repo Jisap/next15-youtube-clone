@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { users, videos, videoViews } from "@/db/schema";
+import { users, videoReactions, videos, videoViews } from "@/db/schema";
 import { mux } from "@/lib/mux";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
-import { and, eq, getTableColumns } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
@@ -14,18 +14,58 @@ import { workflow } from "@/lib/workflow";
 
 export const videosRouter = createTRPCRouter({
   getOne: baseProcedure
-    .input(z.object({ id: z.string().uuid() }))
-    .query(async ({ input }) => {
-      const [existingVideo] = await db
+    .input(z.object({ id: z.string().uuid() }))                                   // Se requiere de un id de un video
+    .query(async ({ input, ctx }) => {
+      
+      const { clerkUserId } = ctx;                                                // Se requiere la identificación del usuario logueado -> ctx 
+      
+      let userId;
+      
+      const [user] = await db                                                     // Busca en la base de datos si existe un usuario con ese ID de Clerk
+        .select()
+        .from(users)
+        .where(inArray(users.clerkId, clerkUserId ? [clerkUserId] : []))
+
+      if(user){
+        userId = user.id                                                          // Si existe, guarda su ID interno para uso posterior 
+      }  
+      
+      const viewerReactions = db.$with("viewer_reactions").as(                    // Crea una subconsulta temporal llamada "viewer_reactions"
+        db
+          .select({                                                               // Esta subconsulta obtiene el tipo de reacción (like/dislike) que el usuario actual ha dado al video
+            videoId: videoReactions.videoId,
+            type: videoReactions.type,
+          })
+          .from(videoReactions)
+          .where(inArray(videoReactions.userId, userId ? [userId] : []))
+      )
+
+      const [existingVideo] = await db                                            // Consulta ppal: 
         .select({
-          ...getTableColumns(videos),
+          ...getTableColumns(videos),                                             // Selecciona todas las columnas del video
           user: {
-            ...getTableColumns(users),
+            ...getTableColumns(users),                                            // Incluye datos del creador del video mediante un JOIN con la tabla de usuarios
           },
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id))
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),    // Cuenta el número de veces que el video ha sido visto
+          likeCount: db.$count(                                                   // Cuenta el número de veces que el video ha sido "me gusta"
+            videoReactions, 
+              and(
+                eq(videoReactions.videoId, videos.id),
+                eq(videoReactions.type, "like")
+              ),   
+          ),
+          dislikeCount: db.$count(                                                // Cuenta el número de veces que el video ha sido "no me gusta"
+            videoReactions,
+            and(
+              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.type, "dislike")
+            ),
+          ),
+          viewerReaction: viewerReactions.type                                    // Devuelve el tipo de reacción del usuario actual (like/dislike)
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id)) // Añade la relación de usuario correspondiente al creador del video
+        .innerJoin(users, eq(videos.userId, users.id))                            // Añade la relación de usuario correspondiente al creador del video
+        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))        // Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
         .where(and(eq(videos.id, input.id)))
 
       if(!existingVideo){
