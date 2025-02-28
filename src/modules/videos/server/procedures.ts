@@ -41,6 +41,7 @@ export const videosRouter = createTRPCRouter({
       )
 
       const [existingVideo] = await db                                            // Consulta ppal: 
+        .with(viewerReactions)                                                    // Se agrega la subconsulta "viewer_reactions" a la consulta ppal (*)
         .select({
           ...getTableColumns(videos),                                             // Selecciona todas las columnas del video
           user: {
@@ -50,23 +51,28 @@ export const videosRouter = createTRPCRouter({
           likeCount: db.$count(                                                   // Cuenta el número de veces que el video ha sido "me gusta"
             videoReactions, 
               and(
-                eq(videoReactions.videoId, videos.id),
+                eq(videoReactions.videoId, videos.id),                                          // se usa la tabla original no la cte
                 eq(videoReactions.type, "like")
               ),   
           ),
           dislikeCount: db.$count(                                                // Cuenta el número de veces que el video ha sido "no me gusta"
             videoReactions,
             and(
-              eq(videoReactions.videoId, videos.id),
+              eq(videoReactions.videoId, videos.id),                                            // se usa la tabla original no la cte
               eq(videoReactions.type, "dislike")
             ),
           ),
-          viewerReaction: viewerReactions.type                                    // Devuelve el tipo de reacción del usuario actual (like/dislike)
+          viewerReaction: viewerReactions.type                                    // (*) Devuelve el tipo de reacción del usuario actual (like/dislike)
         })
         .from(videos)
         .innerJoin(users, eq(videos.userId, users.id))                            // Añade la relación de usuario correspondiente al creador del video
-        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))        // Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
+        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))        // (*) Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
         .where(and(eq(videos.id, input.id)))
+        .groupBy(
+          videos.id,
+          users.id,
+          viewerReactions.type
+        )
 
       if(!existingVideo){
         throw new TRPCError({ code: "NOT_FOUND" })
