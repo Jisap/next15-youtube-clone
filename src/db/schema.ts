@@ -3,7 +3,6 @@
 import { relations } from "drizzle-orm";
 
 import { pgTable, uuid, text, timestamp, uniqueIndex, integer, pgEnum, primaryKey } from "drizzle-orm/pg-core";
-import { view } from "drizzle-orm/sqlite-core";
 import {
   createInsertSchema,
   createSelectSchema,
@@ -25,7 +24,13 @@ export const users = pgTable("users", {
 export const userRelations = relations(users, ({many}) => ({       // Cada user tiene muchos videos
   video: many(videos),
   videoViews: many(videoViews),
-  videoReactions: many(videoReactions)
+  videoReactions: many(videoReactions),
+  subscriptions: many(subscriptions, {                             // Un usuario puede suscribirse a muchos otros usuarios.
+    relationName: "subscriptions_viewer_id_fkey" 
+  }),  
+  subscribers: many(subscriptions, {                               // Un usuario puede tener muchos suscriptores (otros usuarios que lo siguen).
+    relationName: "subscriptions_creator_id_fkey"
+  })     
 }));
 
 export const subscriptions = pgTable("subscriptions", {
@@ -33,7 +38,25 @@ export const subscriptions = pgTable("subscriptions", {
   creatorId: uuid("creator_id").references(() => users.id, { onDelete: "cascade" }).notNull(), // usuario creador del video
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-})
+}, (t) => [
+  primaryKey({
+    name: "subscriptions_pk",
+    columns: [t.viewerId, t.creatorId]
+  }),
+]);
+
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({           // Se agregan relaciones a la tabla subscriptions
+  viewerId: one(users, {                                                                       // Cada subscription tiene un viewerId que apunta a un id en la tabla users.
+    fields: [subscriptions.viewerId],
+    references: [users.id], 
+    relationName: "subscriptions_viewer_id_fkey"
+  }),
+  creatorId: one(users, {                                                                      // Cada creador tiene un creatorId que apunta a un id en la tabla users.
+    fields: [subscriptions.creatorId],
+    references: [users.id],
+    relationName: "subscriptions_creator_id_fkey"
+  })
+}))
 
 export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -117,7 +140,7 @@ export const videoViewRelations = relations(videoViews, ({ one, many }) => ({   
     fields: [videoViews.videoId],                                                                // Cada fila en videoViews tiene un videoId que apunta a un id en la tabla videos.
     references: [videos.id],                                                                     // Cada videoId de videoViews apunta a un id en la tabla videos.
   }),
-  views: many(videoViews) 
+  //views: many(videoViews) 
 }));
 
 export const videoViewSelectSchema = createSelectSchema(videoViews);                             // Esquema de validación para leer datos de la tabla videoViews.
