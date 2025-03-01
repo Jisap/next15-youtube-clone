@@ -34,8 +34,8 @@ export const userRelations = relations(users, ({many}) => ({       // Cada user 
 }));
 
 export const subscriptions = pgTable("subscriptions", {
-  viewerId: uuid("viewer_id").references(() => users.id, { onDelete: "cascade" }).notNull(),   // usuario que se suscribe
-  creatorId: uuid("creator_id").references(() => users.id, { onDelete: "cascade" }).notNull(), // usuario creador del video
+  viewerId: uuid("viewer_id").references(() => users.id, { onDelete: "cascade" }).notNull(),   // Representa al usuario que sigue o se suscribe a otro usuario.
+  creatorId: uuid("creator_id").references(() => users.id, { onDelete: "cascade" }).notNull(), // Representa al usuario que es seguido o suscrito por otros.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => [
@@ -51,7 +51,7 @@ export const subscriptionsRelations = relations(subscriptions, ({ one, many }) =
     references: [users.id], 
     relationName: "subscriptions_viewer_id_fkey"
   }),
-  creatorId: one(users, {                                                                      // Cada creador tiene un creatorId que apunta a un id en la tabla users.
+  creatorId: one(users, {                                                                      // Cada suscripción tiene un creatorId que representa al usuario que está siendo seguido.
     fields: [subscriptions.creatorId],
     references: [users.id],
     relationName: "subscriptions_creator_id_fkey"

@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { users, videoReactions, videos, videoViews } from "@/db/schema";
+import { subscriptions, users, videoReactions, videos, videoViews } from "@/db/schema";
 import { mux } from "@/lib/mux";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
-import { and, eq, getTableColumns, inArray } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
@@ -14,64 +14,80 @@ import { workflow } from "@/lib/workflow";
 
 export const videosRouter = createTRPCRouter({
   getOne: baseProcedure
-    .input(z.object({ id: z.string().uuid() }))                                   // Se requiere de un id de un video
+    .input(z.object({ id: z.string().uuid() }))                                         // Se requiere de un id de un video
     .query(async ({ input, ctx }) => {
       
-      const { clerkUserId } = ctx;                                                // Se requiere la identificación del usuario logueado -> ctx 
+      const { clerkUserId } = ctx;                                                      // Se requiere la identificación del usuario logueado -> ctx 
       
       let userId;
       
-      const [user] = await db                                                     // Busca en la base de datos si existe un usuario con ese ID de Clerk
+      const [user] = await db                                                           // Busca en la base de datos si existe un usuario con ese ID de Clerk
         .select()
         .from(users)
         .where(inArray(users.clerkId, clerkUserId ? [clerkUserId] : []))
 
       if(user){
-        userId = user.id                                                          // Si existe, guarda su ID interno para uso posterior 
+        userId = user.id                                                               // Si existe, guarda su ID interno para uso posterior 
       }  
       
-      const viewerReactions = db.$with("viewer_reactions").as(                    // Crea una subconsulta temporal llamada "viewer_reactions"
+      const viewerReactions = db.$with("viewer_reactions").as(                         // Crea una subconsulta temporal llamada "viewer_reactions"
         db
-          .select({                                                               // Esta subconsulta obtiene el tipo de reacción (like/dislike) que el usuario actual ha dado al video
+          .select({                                                                    // Esta subconsulta obtiene el tipo de reacción (like/dislike) que el usuario actual ha dado al video
             videoId: videoReactions.videoId,
             type: videoReactions.type,
           })
           .from(videoReactions)
           .where(inArray(videoReactions.userId, userId ? [userId] : []))
+      );
+
+      const viewerSubscriptions = db.$with("viewer_subscriptions").as(
+        db
+          .select()
+          .from(subscriptions)
+          .where(inArray(subscriptions.viewerId, userId ? [userId] : []))              // Filtra los resultados para obtener solo las suscripciones cuyo viewerId coincide con userId.
       )
 
-      const [existingVideo] = await db                                            // Consulta ppal: 
-        .with(viewerReactions)                                                    // Se agrega la subconsulta "viewer_reactions" a la consulta ppal (*)
+      const [existingVideo] = await db                                                 // Consulta ppal: 
+        .with(
+          viewerReactions,                                                             // Se agrega la subconsulta "viewer_reactions" a la consulta ppal (*)
+          viewerSubscriptions                                                          // También se agrega la subconsulta "viewer_subscriptions" para obtener la cantidad de suscripciones del usuario.
+        )                                    
         .select({
-          ...getTableColumns(videos),                                             // Selecciona todas las columnas del video
+          ...getTableColumns(videos),                                                  // Selecciona todas las columnas del video
           user: {
-            ...getTableColumns(users),                                            // Incluye datos del creador del video mediante un JOIN con la tabla de usuarios
+            ...getTableColumns(users),                                                 // Incluye datos del creador del video mediante un JOIN con la tabla de usuarios
+            subscriberCount: db.$count(                                                // Cuenta el número de suscriptores del video mirando en la tabla subscriptions
+              subscriptions, 
+              eq(subscriptions.creatorId, users.id)                                    // Para ello se buscan los creatorIds de las suscripciones que coincidan con el id del user actual
+            ),
+            viewerSubscribed: isNotNull(viewerSubscriptions.viewerId).mapWith(Boolean) // Verifica si el usuario autenticado está suscrito al creador del video
           },
-          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),    // Cuenta el número de veces que el video ha sido visto
-          likeCount: db.$count(                                                   // Cuenta el número de veces que el video ha sido "me gusta"
+          viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),         // Cuenta el número de veces que el video ha sido visto
+          likeCount: db.$count(                                                        // Cuenta el número de veces que el video ha sido "me gusta"
             videoReactions, 
               and(
                 eq(videoReactions.videoId, videos.id),                                          // se usa la tabla original no la cte
                 eq(videoReactions.type, "like")
               ),   
           ),
-          dislikeCount: db.$count(                                                // Cuenta el número de veces que el video ha sido "no me gusta"
+          dislikeCount: db.$count(                                                     // Cuenta el número de veces que el video ha sido "no me gusta"
             videoReactions,
             and(
               eq(videoReactions.videoId, videos.id),                                            // se usa la tabla original no la cte
               eq(videoReactions.type, "dislike")
             ),
           ),
-          viewerReaction: viewerReactions.type                                    // (*) Devuelve el tipo de reacción del usuario actual (like/dislike)
+          viewerReaction: viewerReactions.type                                         // (*) Devuelve el tipo de reacción del usuario actual (like/dislike)
         })
         .from(videos)
-        .innerJoin(users, eq(videos.userId, users.id))                            // Añade la relación de usuario correspondiente al creador del video
-        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))        // (*) Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
+        .innerJoin(users, eq(videos.userId, users.id))                                 // Añade la relación de usuario correspondiente al creador del video
+        .leftJoin(viewerReactions, eq(viewerReactions.videoId, videos.id))             // (*) Se mantienen las columnas de videos independientemente de si hay coincidencias con la tabla de viewer_reactions
+        .leftJoin(viewerSubscriptions, eq(viewerSubscriptions.creatorId, users.id))    // Idem para las suscripciones
         .where(and(eq(videos.id, input.id)))
         // .groupBy(
         //   videos.id,
         //   users.id,
-        //   viewerReactions.type                                                 //  Combina todas las filas que tienen el mismo videos.id, users.id y viewerReactions.type en un solo grupo.  
+        //   viewerReactions.type                                                      //  Combina todas las filas que tienen el mismo videos.id, users.id y viewerReactions.type en un solo grupo.  
         // )
 
       if(!existingVideo){
