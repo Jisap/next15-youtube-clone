@@ -1,11 +1,12 @@
 
-import { videoReactions } from '@/db/schema';
+import { subscriptions, videoReactions } from '@/db/schema';
 import { baseProcedure, protectedProcedure, createTRPCRouter } from '../init';
 import { categoriesRouter } from '@/modules/categories/server/procedures';
 import { studioRouter } from '@/modules/studio/server/procedures';
 import { videoViewsRouter } from '@/modules/video-views/server/procedures';
 import { videosRouter } from '@/modules/videos/server/procedures';
 import { videoReactionsRouter } from '@/modules/video-reactions/server/procedures';
+import { SubscriptionsRouter } from '@/modules/subscriptions/server/procedures';
 
 
 
@@ -15,6 +16,7 @@ export const AppRouter = createTRPCRouter({ // Se crea un enrutador tRPC
   videos: videosRouter,
   videoViews: videoViewsRouter,
   videoReactions: videoReactionsRouter,
+  subscriptions: SubscriptionsRouter
 });
 
 export type AppRouter = typeof AppRouter
