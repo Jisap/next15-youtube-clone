@@ -30,7 +30,8 @@ export const userRelations = relations(users, ({many}) => ({       // Cada user 
   }),  
   subscribers: many(subscriptions, {                               // Un usuario puede tener muchos suscriptores (otros usuarios que lo siguen).
     relationName: "subscriptions_creator_id_fkey"
-  })     
+  }),
+  comments: many(comments)                                         // Un usuario puede tener muchos comentarios
 }));
 
 export const subscriptions = pgTable("subscriptions", {
@@ -101,23 +102,42 @@ export const videoInsertSchema = createInsertSchema(videos);                    
 export const videoUpdateSchema = createUpdateSchema(videos);                                  // Crea un esquema de validación para actualizar registros en la tabla videos.
 export const videoSelectSchema = createSelectSchema(videos);                                  // Define un esquema de validación para seleccionar registros de la tabla videos.
 
-export const videoRelations = relations(videos, ({ one, many }) => ({                               // Relaciones entre las tablas (Cada video tiene un usuario)
-  user: one(users, {                                                                          // Relación 1-1 con la tabla `users`
-    fields: [videos.userId],                                                                  // Drizzle ORM necesita relations() para entender cómo conectar los datos a nivel de consultas. 
-    references: [users.id],                                                                   // De esta manera se define que, al hacer una consulta de videos,   
-  }),                                                                                         // Drizzle ORM podrá incluir automáticamente los datos del usuario al que pertenece ese video.
-  category: one(categories, {
+export const videoRelations = relations(videos, ({ one, many }) => ({                         // Relaciones entre las tablas 
+  user: one(users, {                                                                          // Cada video tiene un usuario 
+    fields: [videos.userId],                                                                    
+    references: [users.id],                                                                    
+  }),                                                                                           
+  category: one(categories, {                                                                 // Cada video tiene una categoría
     fields: [videos.categoryId],
     references: [categories.id],
   }),
-  views: many(videoViews),
-  reactions: many(videoReactions)
+  views: many(videoViews),                                                                    // Cada video tiene muchas visualizaciones
+  reactions: many(videoReactions),                                                            // Cada video tiene muchas reacciones
+  comments: many(comments)                                                                    // Cada video tiene muchos comentarios
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
   videos: many(videos)
 }));
 
+export const comments = pgTable("comments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
+  value: text("value").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const commentRelations = relations(comments, ({ one, many }) => ({                      // Relaciones para la tabla comments
+  user: one(users, {                                                                           // Cada comentario se corresponde con un usuario.
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  videos: one(videos, {                                                                        // Cada comentario se corresponde con un video.
+    fields: [comments.videoId],
+    references: [videos.id],
+  })
+}))
 
 export const videoViews = pgTable("video_views", {                                              // La tabla video_views no almacena un campo llamado video_views explícitamente.
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),        // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
@@ -164,11 +184,11 @@ export const videoReactions = pgTable("video_reactions", {                      
 ]);
 
 export const videoReactionRelations = relations(videoReactions, ({ one, many }) => ({            // Relaciones para la tabla video_reactions
-  users: one(users, {                                                                            // Relación "muchos" a "uno" con la tabla users
+  users: one(users, {                                                                            // Cada reaction tiene un usuario
     fields: [videoReactions.userId],                                                             // Cada fila en video_reactions tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                      // Cada userId de video_reactions apunta a un id en la tabla users.
   }),
-  videos: one(videos, {                                                                          // Relación "muchos" a "uno" con la tabla videos
+  videos: one(videos, {                                                                          // cada reaction se corresponde con un video
     fields: [videoReactions.videoId],                                                            // Cada fila en video_reactions tiene un videoId que apunta a un id en la tabla videos.
     references: [videos.id],                                                                     // Cada videoId de video_reactions apunta a un id en la tabla videos.
   }),
