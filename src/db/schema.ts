@@ -128,16 +128,20 @@ export const comments = pgTable("comments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const commentRelations = relations(comments, ({ one, many }) => ({                      // Relaciones para la tabla comments
-  user: one(users, {                                                                           // Cada comentario se corresponde con un usuario.
+export const commentRelations = relations(comments, ({ one, many }) => ({                       // Relaciones para la tabla comments
+  user: one(users, {                                                                            // Cada comentario se corresponde con un usuario.
     fields: [comments.userId],
     references: [users.id],
   }),
-  videos: one(videos, {                                                                        // Cada comentario se corresponde con un video.
+  videos: one(videos, {                                                                         // Cada comentario se corresponde con un video.
     fields: [comments.videoId],
     references: [videos.id],
   })
 }))
+
+export const commentInsertSchema = createInsertSchema(comments);                                // Genera un esquema de validación que se usa para insertar nuevos registros en la tabla comments.
+export const commentUpdateSchema = createUpdateSchema(comments);                                // Crea un esquema de validación para actualizar registros en la tabla comments.
+export const commentSelectSchema = createSelectSchema(comments);  
 
 export const videoViews = pgTable("video_views", {                                              // La tabla video_views no almacena un campo llamado video_views explícitamente.
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),        // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
