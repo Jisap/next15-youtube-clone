@@ -45,13 +45,13 @@ export const subscriptions = pgTable("subscriptions", {
   }),
 ]);
 
-export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({           // Se agregan relaciones a la tabla subscriptions
-  viewerId: one(users, {                                                                       // Cada subscription tiene un viewerId que apunta a un id en la tabla users.
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({         // Se agregan relaciones a la tabla subscriptions
+  viewer: one(users, {                                                                       // Cada subscription tiene un viewerId que apunta a un id en la tabla users.
     fields: [subscriptions.viewerId],
     references: [users.id], 
     relationName: "subscriptions_viewer_id_fkey"
   }),
-  creatorId: one(users, {                                                                      // Cada suscripción tiene un creatorId que representa al usuario que está siendo seguido.
+  creator: one(users, {                                                                      // Cada suscripción tiene un creatorId que representa al usuario que está siendo seguido.
     fields: [subscriptions.creatorId],
     references: [users.id],
     relationName: "subscriptions_creator_id_fkey"
