@@ -1,8 +1,19 @@
+"use client"
 
+import { trpc } from "@/trpc/client"
 
-const CommentSection = () => {
+interface CommentSectionProps {
+  videoId: string
+}
+
+const CommentSection = ({ videoId }: CommentSectionProps) => {
+
+  const [comments] = trpc.comments.getMany.useSuspenseQuery({ videoId })
+
   return (
-    <div>CommentSection</div>
+    <div>
+      {JSON.stringify(comments)}
+    </div>
   )
 }
 
