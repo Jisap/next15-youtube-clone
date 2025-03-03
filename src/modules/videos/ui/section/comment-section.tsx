@@ -5,6 +5,7 @@ import { DEFAULT_LIMIT } from "@/constant"
 import { CommentForm } from "@/modules/comments/ui/components/comment-form"
 import { CommentItem } from "@/modules/comments/ui/components/comment-item"
 import { trpc } from "@/trpc/client"
+import { Loader2Icon } from "lucide-react"
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 
@@ -15,7 +16,7 @@ interface CommentSectionProps {
 
 export const CommentSection = ({ videoId }: CommentSectionProps) => {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={<CommentsSectionSkeleton />}>
       <ErrorBoundary fallback={<p>Error...</p>}>
         <CommentSectionSuspense videoId={videoId} />
       </ErrorBoundary>
@@ -23,8 +24,15 @@ export const CommentSection = ({ videoId }: CommentSectionProps) => {
   )
 }
 
-const CommentSectionSuspense = ({ videoId }: CommentSectionProps) => {
+const CommentsSectionSkeleton = () => {
+  return (
+    <div className="mt-6 flex justify-center items-center"> 
+      <Loader2Icon className="text-muted-foreground size-7 animate-spin" />
+    </div>
+  )
+}
 
+const CommentSectionSuspense = ({ videoId }: CommentSectionProps) => {
   const [comments, query] = trpc.comments.getMany.useSuspenseInfiniteQuery({          // SuspenseInfiniteQuery de TRPC es una variante de SuspenseQuery de Tanstack Query
     videoId, limit: DEFAULT_LIMIT                                                     // El objeto query contiene los métodos de consulta para manejar la consulta infinita 
   }, {
