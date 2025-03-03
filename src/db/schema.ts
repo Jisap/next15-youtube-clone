@@ -126,6 +126,7 @@ export const comments = pgTable("comments", {
   videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
   value: text("value").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const commentRelations = relations(comments, ({ one, many }) => ({                       // Relaciones para la tabla comments
