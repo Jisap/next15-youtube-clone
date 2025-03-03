@@ -70,7 +70,7 @@ export const CommentItem = ({
           {/* TODO: Reactions  */}
         </div>
 
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
