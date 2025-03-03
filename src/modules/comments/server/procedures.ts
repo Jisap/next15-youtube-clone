@@ -40,14 +40,14 @@ export const commentsRouter = createTRPCRouter({
     const { videoId, cursor, limit } = input;
 
     const [totalData, data ] = await Promise.all([
-      await db
+      db
         .select({
           count: count()                                               // Se obtiene el número total de comentarios para el video
         })
         .from(comments)
         .where(eq(comments.videoId, videoId)),
 
-      await db
+      db
         .select({
           ...getTableColumns(comments),
           user: users,
