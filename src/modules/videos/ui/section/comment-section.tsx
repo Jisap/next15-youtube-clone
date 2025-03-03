@@ -43,7 +43,7 @@ const CommentSectionSuspense = ({ videoId }: CommentSectionProps) => {
         <CommentForm videoId={videoId} />
         <div className="flex flex-col gap-4 mt-2">
           {comments.pages.flatMap(
-            (page) => page.data).map(
+            (page) => page.items).map(
               (comment) => (
                 <CommentItem 
                   key={comment.id}

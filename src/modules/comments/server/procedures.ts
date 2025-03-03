@@ -74,7 +74,7 @@ export const commentsRouter = createTRPCRouter({
       : null
 
     return {
-      data,
+      items,
       nextCursor
     }
   })
