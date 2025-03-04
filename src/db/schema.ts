@@ -33,7 +33,8 @@ export const userRelations = relations(users, ({many}) => ({       // Cada user 
   subscribers: many(subscriptions, {                               // Un usuario puede tener muchos suscriptores (otros usuarios que lo siguen).
     relationName: "subscriptions_creator_id_fkey"
   }),
-  comments: many(comments)                                         // Un usuario puede tener muchos comentarios
+  comments: many(comments),                                        // Un usuario puede tener muchos comentarios
+  commentReactions: many(commentReactions)                         // Un usuario puede tener muchas reacciones a comentarios
 }));
 
 export const subscriptions = pgTable("subscriptions", {
@@ -139,7 +140,8 @@ export const commentRelations = relations(comments, ({ one, many }) => ({       
   videos: one(videos, {                                                                         // Cada comentario se corresponde con un video.
     fields: [comments.videoId],
     references: [videos.id],
-  })
+  }),
+  reactions: many(commentReactions)                                                             // Cada comentario tiene muchas reacciones
 }))
 
 export const commentInsertSchema = createInsertSchema(comments);                                // Genera un esquema de validación que se usa para insertar nuevos registros en la tabla comments.
@@ -157,7 +159,18 @@ export const commentReactions = pgTable("comment_reactions", {
     name: "comment_reactions_pk",
     columns: [t.userId, t.commentId]
   }),
-])                                   
+]);
+
+export const commentReactionRelations = relations(commentReactions, ({ one, many }) => ({       // Relaciones para la tabla comment_reactions
+  user: one(users, {                                                                           // Cada reaction tiene un usuario
+    fields: [commentReactions.userId],                                                          // Cada fila en comment_reactions tiene un userId que apunta a un id en la tabla users.
+    references: [users.id],                                                                     // Cada userId de comment_reactions apunta a un id en la tabla users.
+  }),
+  comment: one(comments, {                                                                     // cada reaction se corresponde con un comentario
+    fields: [commentReactions.commentId],                                                       // Cada fila en comment_reactions tiene un commentId que apunta a un id en la tabla comments.
+    references: [comments.id],                                                                  // Cada commentId de comment_reactions apunta a un id en la tabla comments.
+  }),
+}));
 
 export const videoViews = pgTable("video_views", {                                              // La tabla video_views no almacena un campo llamado video_views explícitamente.
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),        // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
@@ -172,15 +185,14 @@ export const videoViews = pgTable("video_views", {                              
 ])
 
 export const videoViewRelations = relations(videoViews, ({ one, many }) => ({                    // Relaciones para la tabla video_views
-  users: one(users, {                                                                            // Relación "muchos" a "uno" con la tabla users
+  user: one(users, {                                                                            // Relación "muchos" a "uno" con la tabla users
     fields: [videoViews.userId],                                                                 // Cada fila en videoViews tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                      // Cada userId de videoViews apunta a un id en la tabla users.
   }),
-  videos: one(videos, {                                                                          // Relación "muchos" a "uno" con la tabla videos
+  video: one(videos, {                                                                          // Relación "muchos" a "uno" con la tabla videos
     fields: [videoViews.videoId],                                                                // Cada fila en videoViews tiene un videoId que apunta a un id en la tabla videos.
     references: [videos.id],                                                                     // Cada videoId de videoViews apunta a un id en la tabla videos.
   }),
-  //views: many(videoViews) 
 }));
 
 export const videoViewSelectSchema = createSelectSchema(videoViews);                             // Esquema de validación para leer datos de la tabla videoViews.
@@ -204,11 +216,11 @@ export const videoReactions = pgTable("video_reactions", {                      
 ]);
 
 export const videoReactionRelations = relations(videoReactions, ({ one, many }) => ({            // Relaciones para la tabla video_reactions
-  users: one(users, {                                                                            // Cada reaction tiene un usuario
+  user: one(users, {                                                                            // Cada reaction tiene un usuario
     fields: [videoReactions.userId],                                                             // Cada fila en video_reactions tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                      // Cada userId de video_reactions apunta a un id en la tabla users.
   }),
-  videos: one(videos, {                                                                          // cada reaction se corresponde con un video
+  video: one(videos, {                                                                          // cada reaction se corresponde con un video
     fields: [videoReactions.videoId],                                                            // Cada fila en video_reactions tiene un videoId que apunta a un id en la tabla videos.
     references: [videos.id],                                                                     // Cada videoId de video_reactions apunta a un id en la tabla videos.
   }),
