@@ -78,7 +78,9 @@ export const CommentItem = ({
                 onClick={() => {}}  
               >
                 <ThumbsUpIcon 
-                  className={cn()}
+                  className={cn(
+                    comment.viewerReaction === "like" && "fill-black"
+                  )}
                 />
               </Button>
 
@@ -94,7 +96,9 @@ export const CommentItem = ({
                 onClick={() => { }}
               >
                 <ThumbsDownIcon
-                  className={cn()}
+                  className={cn(
+                    comment.viewerReaction === "dislike" && "fill-black"
+                  )}
                 />
               </Button>
 

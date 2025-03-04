@@ -80,7 +80,7 @@ export const commentsRouter = createTRPCRouter({
           type: commentReactions.type,                                 // Se selecciona el tipo de reaction (like o dislike)
         })
         .from(commentReactions)
-        .where(inArray(commentReactions.userId, clerkUserId ? [clerkUserId] : [])) // Filtramos solo las reacciones del usuario actual
+        .where(inArray(commentReactions.userId, userId ? [userId] : [])) // Filtramos solo las reacciones del usuario actual
     )
 
     const [totalData, data ] = await Promise.all([
@@ -126,7 +126,7 @@ export const commentsRouter = createTRPCRouter({
             : undefined,                                               // Si no hay cursor, no se aplica filtro adicional
         ))
         .innerJoin(users, eq(comments.userId, users.id))               // Se añade la info del user que hizo el comentario
-        .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId)) // 
+        .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId)) // Unimos con las reacciones del usuario.
         .orderBy(desc(comments.updatedAt), desc(comments.id))          // Ordena los comentarios de forma descendente por fecha de actualización y luego por id.
         .limit(limit + 1)                                              // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
       
