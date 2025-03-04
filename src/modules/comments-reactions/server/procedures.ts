@@ -77,7 +77,7 @@ export const commentReactionsRouter = createTRPCRouter({
         return deletedViewerReaction
       }
 
-      const [createdVideoReaction] = await db               
+      const [createdCommentReaction] = await db               
         .insert(commentReactions)                             
         .values({
           userId,
@@ -92,6 +92,6 @@ export const commentReactionsRouter = createTRPCRouter({
         })
         .returning()
 
-      return createdVideoReaction
+      return createdCommentReaction
     })
 })
