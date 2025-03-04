@@ -83,7 +83,7 @@ export const CommentItem = ({
               </Button>
 
               <span className="text-xs text-muted-foreground">
-                0
+                {comment.likeCount}
               </span>
 
               <Button
@@ -99,7 +99,7 @@ export const CommentItem = ({
               </Button>
 
               <span className="text-xs text-muted-foreground">
-                0
+                {comment.dislikeCount}
               </span>
             </div>
           </div>

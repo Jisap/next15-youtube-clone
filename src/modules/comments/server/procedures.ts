@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { commentReactions, comments, users } from "@/db/schema";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, inArray, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -59,8 +59,29 @@ export const commentsRouter = createTRPCRouter({
       limit: z.number().min(1).min(1).max(100),
     })
   )
-  .query(async({ input }) => {
+  .query(async({ input, ctx }) => {
+    const { clerkUserId } = ctx;
     const { videoId, cursor, limit } = input;
+    let userId;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(inArray(users.clerkId, clerkUserId ? [clerkUserId] : []))
+    
+    if(user){
+      userId = user.id // Se asigna a userId el id de la tabla users correspondiente al clerkUserId
+    }
+
+    const viewerReactions = db.$with("viewer_reactions").as(           // Subconsulta para obtener las reacciones del usuario actual.   
+      db
+        .select({
+          commentId: commentReactions.commentId,                       // Se selecciona el id del comentario de la tabla commentReactions
+          type: commentReactions.type,                                 // Se selecciona el tipo de reaction (like o dislike)
+        })
+        .from(commentReactions)
+        .where(inArray(commentReactions.userId, clerkUserId ? [clerkUserId] : [])) // Filtramos solo las reacciones del usuario actual
+    )
 
     const [totalData, data ] = await Promise.all([
       db
@@ -71,9 +92,11 @@ export const commentsRouter = createTRPCRouter({
         .where(eq(comments.videoId, videoId)),                         
 
       db                                                               // Consulta principal para obtener los comentarios con información adicional.
+        .with(viewerReactions)                                             // Se añade la subconsulta de viewerReactions (reacciones del usuario actual)
         .select({
           ...getTableColumns(comments),                                    // Se seleccionan las columnas de la tabla comments
           user: users,                                                     // Se añade la relación con la tabla users
+          viewerReaction: viewerReactions.type,                            // Selecciona la reacción del usuario actual      
           likeCount: db.$count(                                            // Se obtiene el número de likes para cada comentario
             commentReactions,                                                       // Para ellos buscamos en commentReactions
             and(
@@ -103,6 +126,7 @@ export const commentsRouter = createTRPCRouter({
             : undefined,                                               // Si no hay cursor, no se aplica filtro adicional
         ))
         .innerJoin(users, eq(comments.userId, users.id))               // Se añade la info del user que hizo el comentario
+        .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId)) // 
         .orderBy(desc(comments.updatedAt), desc(comments.id))          // Ordena los comentarios de forma descendente por fecha de actualización y luego por id.
         .limit(limit + 1)                                              // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
       
