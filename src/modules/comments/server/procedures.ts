@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { comments, users } from "@/db/schema";
+import { commentReactions, comments, users } from "@/db/schema";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, count, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
@@ -67,17 +67,31 @@ export const commentsRouter = createTRPCRouter({
         .select({
           count: count()                                               // Se obtiene el número total de comentarios para el video
         })
-        .from(comments)
-        .where(eq(comments.videoId, videoId)),
+        .from(comments) 
+        .where(eq(comments.videoId, videoId)),                         
 
-      db
+      db                                                               // Consulta principal para obtener los comentarios con información adicional.
         .select({
-          ...getTableColumns(comments),
-          user: users,
+          ...getTableColumns(comments),                                    // Se seleccionan las columnas de la tabla comments
+          user: users,                                                     // Se añade la relación con la tabla users
+          likeCount: db.$count(                                            // Se obtiene el número de likes para cada comentario
+            commentReactions,                                                       // Para ellos buscamos en commentReactions
+            and(
+              eq(commentReactions.type, "like"),                                    // solo los likes 
+              eq(commentReactions.commentId, comments.id),                          // que apunten al comentario actual
+            )
+          ),
+          dislikeCount: db.$count(                                            // Se obtiene el número de dislikes para cada comentario
+            commentReactions,                                                       // Para ellos buscamos en commentReactions
+            and(
+              eq(commentReactions.type, "dislike"),                                 // solo los dislikes 
+              eq(commentReactions.commentId, comments.id),                          // que apunten al comentario actual
+            )
+          )
         })
-        .from(comments)
+        .from(comments)                                                // De la tabla comments 
         .where(and(
-          eq(comments.videoId, videoId),
+          eq(comments.videoId, videoId),                               // se  mostrarán solo comentarios del video especificado.
           cursor                                                       // Si hay un cursor. Este cursor se usa para obtener solo los comentarios más antiguos
             ? or(
               lt(comments.updatedAt, cursor.updatedAt),                // Filtra los comentarios cuya fecha de actualización (updatedAt) sea anterior (<) a la del cursor.
