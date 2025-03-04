@@ -2,7 +2,6 @@ import Link from "next/link"
 import { CommentGetManyOutput } from "../../types"
 import UserAvatar from "@/components/user-avatar"
 import { formatDistanceToNow } from "date-fns"
-import { comments } from '../../../../db/schema';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -42,6 +41,29 @@ export const CommentItem = ({
     }
   });
 
+  const like = trpc.commentsReactions.like.useMutation({
+    onSuccess: () => {
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      if(error.data?.code === "UNAUTHORIZED"){
+        clerk.openSignIn();
+      }
+    }
+  });
+  const dislike = trpc.commentsReactions.dislike.useMutation({
+    onSuccess: () => {
+      utils.comments.getMany.invalidate({ videoId: comment.videoId });
+    },
+    onError: (error) => {
+      toast.error("Something went wrong");
+      if (error.data?.code === "UNAUTHORIZED") {
+        clerk.openSignIn();
+      }
+    }
+  });
+
   return (
     <div>
       <div className="flex gap-4">
@@ -74,8 +96,8 @@ export const CommentItem = ({
                 className="size-8"
                 size="icon"
                 variant="ghost"
-                disabled={false}
-                onClick={() => {}}  
+                disabled={like.isPending}
+                onClick={() => like.mutate({ commentId: comment.id})}  
               >
                 <ThumbsUpIcon 
                   className={cn(
@@ -92,8 +114,8 @@ export const CommentItem = ({
                 className="size-8"
                 size="icon"
                 variant="ghost"
-                disabled={false}
-                onClick={() => { }}
+                disabled={dislike.isPending}
+                onClick={() => dislike.mutate({ commentId: comment.id})}
               >
                 <ThumbsDownIcon
                   className={cn(
