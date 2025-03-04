@@ -9,6 +9,8 @@ import {
   createUpdateSchema,
 } from "drizzle-zod";
 
+export const reactionType = pgEnum("reaction_type", ["like", "dislike"])
+
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   clerkId: text("clerk_id").unique().notNull(),
@@ -144,6 +146,19 @@ export const commentInsertSchema = createInsertSchema(comments);                
 export const commentUpdateSchema = createUpdateSchema(comments);                                // Crea un esquema de validación para actualizar registros en la tabla comments.
 export const commentSelectSchema = createSelectSchema(comments);  
 
+export const commentReactions = pgTable("comment_reactions", {
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  commentId: uuid("comment_id").references(() => comments.id, { onDelete: "cascade" }).notNull(),
+  type: reactionType("type").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => [
+  primaryKey({
+    name: "comment_reactions_pk",
+    columns: [t.userId, t.commentId]
+  }),
+])                                   
+
 export const videoViews = pgTable("video_views", {                                              // La tabla video_views no almacena un campo llamado video_views explícitamente.
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),        // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
   videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),     // La relación entre userId y videoId permite rastrear quién ha visto qué.
@@ -173,7 +188,7 @@ export const videoViewInsertSchema = createInsertSchema(videoViews);            
 export const videoViewUpdateSchema = createUpdateSchema(videoViews);                             // Esquema de validación para actualizar datos en la tabla videoViews.
 
 
-export const reactionType = pgEnum("reaction_type", ["like", "dislike"])
+
 
 export const videoReactions = pgTable("video_reactions", {                                       // La tabla video_reactions no almacena un campo llamado video_reactions explícitamente.
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),         // Cada fila en la tabla representa una visualización única de un video por parte de un usuario.
