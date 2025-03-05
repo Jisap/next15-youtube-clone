@@ -67,6 +67,7 @@ export const commentsRouter = createTRPCRouter({
   getMany: baseProcedure
     .input(z.object({
       videoId: z.string().uuid(),
+      parentId: z.string().uuid().nullish(),
       cursor: z.object({
         id: z.string().uuid(),
         updatedAt: z.date()
@@ -76,7 +77,7 @@ export const commentsRouter = createTRPCRouter({
   )
   .query(async({ input, ctx }) => {
     const { clerkUserId } = ctx;
-    const { videoId, cursor, limit } = input;
+    const { parentId, videoId, cursor, limit } = input;
     let userId;
 
     const [user] = await db
@@ -145,7 +146,9 @@ export const commentsRouter = createTRPCRouter({
         .from(comments)                                                // De la tabla comments 
         .where(and(
           eq(comments.videoId, videoId),                               // se  mostrarán solo comentarios del video especificado.
-          isNull(comments.parentId),                                   // Solo se mostrarán los comentarios que no sean respuestas
+          parentId                                                     // Si el comentario es una respuesta
+            ? eq(comments.parentId, parentId)                          // se mostrarán solo los comentarios que sean respuestas
+            : isNull(comments.parentId),                               // sino lo es solo se mostrarán los comentarios que no sean respuestas
           cursor                                                       // Si hay un cursor. Este cursor se usa para obtener solo los comentarios más antiguos
             ? or(
               lt(comments.updatedAt, cursor.updatedAt),                // Filtra los comentarios cuya fecha de actualización (updatedAt) sea anterior (<) a la del cursor.
