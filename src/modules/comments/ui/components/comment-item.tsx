@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/trpc/client";
-import { MessageSquareIcon, MoreVerticalIcon, ThumbsDownIcon, ThumbsUpIcon, Trash2Icon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, MessageSquareIcon, MoreVerticalIcon, ThumbsDownIcon, ThumbsUpIcon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -194,7 +194,14 @@ export const CommentItem = ({
       )}
       {comment.replyCount > 0 && variant === "comment" && (
         <div className="pl-14">
-          {comment.replyCount} Replies
+          <Button
+            variant="tertiary"
+            size="sm"
+            onClick={() => setIsRepliesOpen((current) => !current)}
+          >
+            {isRepliesOpen ? <ChevronUpIcon /> : <ChevronDownIcon/>}
+            {comment.replyCount} Replies
+          </Button>
         </div>
       )}      
     </div>
