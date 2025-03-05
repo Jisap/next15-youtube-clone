@@ -125,22 +125,27 @@ export const categoryRelations = relations(categories, ({ many }) => ({
 
 export const comments = pgTable("comments", {
   id: uuid("id").primaryKey().defaultRandom(),
-  parentId: uuid("parent_id"),
-  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
-  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
+  parentId: uuid("parent_id"),                                                                // Referencia al id de otro comentario (para comentarios anidados o respuestas). parentId = NULL es un comentario principal.
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),      // Ref a la tabla users. Cada comentario pertenece a un usuario
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),   // Ref a la tabla videos. Cada comentario pertenece a un video
   value: text("value").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 },(t) => {
   return [
     foreignKey({
-      columns: [t.parentId],
-      foreignColumns: [t.id],
+      columns: [t.parentId],              // Indica que la columna parentId hace referencia a otra columna de la misma tabla
+      foreignColumns: [t.id],             // concretamente a la columna id de la tabla comments
       name: "comments_parent_id_fkey",
   })
   .onDelete("cascade")
   ]
 })
+
+// Comentario A(id = 1, parentId = NULL)
+// ├─ Comentario B(id = 2, parentId = 1)
+// │  ├─ Comentario C(id = 3, parentId = 2)
+// └─ Comentario D(id = 4, parentId = 1)
 
 export const commentRelations = relations(comments, ({ one, many }) => ({                       // Relaciones para la tabla comments
   user: one(users, {                                                                            // Cada comentario se corresponde con un usuario.
@@ -151,7 +156,15 @@ export const commentRelations = relations(comments, ({ one, many }) => ({       
     fields: [comments.videoId],
     references: [videos.id],
   }),
-  reactions: many(commentReactions)                                                             // Cada comentario tiene muchas reacciones
+  parent: one(comments, {                                                                       // Cada comentario se corresponde con un parentId.
+    fields: [comments.parentId],
+    references: [comments.id],
+    relationName: "comments_parent_id_fkey"
+  }),
+  reactions: many(commentReactions),                                                            // Cada comentario tiene muchas reacciones (likes, dislikes)
+  replies: many(comments, {                                                                     // Cada comentario puede tener muchas respuestas (otros comments)    
+    relationName: "comments_parent_id_fkey"
+  })                                                                
 }))
 
 export const commentInsertSchema = createInsertSchema(comments);                                // Genera un esquema de validación que se usa para insertar nuevos registros en la tabla comments.
