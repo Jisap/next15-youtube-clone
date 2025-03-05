@@ -152,31 +152,33 @@ export const CommentItem = ({
         </div>
 
         {/* DropdownMenu para el botón de más opciones del comentario */}
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-            >
-              <MoreVerticalIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {variant === "comment" && (
-              <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
-                <MessageSquareIcon className="size-4"/>
-                Reply
-              </DropdownMenuItem>
-            )}
-            {comment.user.clerkId === userId && (
-              <DropdownMenuItem onClick={() => remove.mutate({ id: comment.id })}>
-                <Trash2Icon className="size-4" />
-                Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {comment.user.clerkId !== userId && variant === "reply" && (
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+              >
+                <MoreVerticalIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+             
+                <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
+                  <MessageSquareIcon className="size-4"/>
+                  Reply
+                </DropdownMenuItem>
+              
+              {comment.user.clerkId === userId && (
+                <DropdownMenuItem onClick={() => remove.mutate({ id: comment.id })}>
+                  <Trash2Icon className="size-4" />
+                  Delete
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {isReplyOpen && variant === "comment" && ( // Si se le dio al boton de reply (tanto en el boton como el dropdownmenu) -> <CommentForm /> con props diferentes 
