@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { commentReactions, comments, users } from "@/db/schema";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, getTableColumns, inArray, lt, or } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, inArray, isNotNull, isNull, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -98,20 +98,35 @@ export const commentsRouter = createTRPCRouter({
         .where(inArray(commentReactions.userId, userId ? [userId] : [])) // Filtramos solo las reacciones del usuario actual
     )
 
+    const replies = db.$with("replies").as(                            // Subconsulta para obtener el conteo de respuestas del comentario actual.
+      db
+        .select({
+          parentId: comments.parentId,
+          count: count(comments.id).as("count")
+        })
+        .from(comments)
+        .where(isNotNull(comments.parentId))
+        .groupBy(comments.parentId)
+    )
+
     const [totalData, data ] = await Promise.all([
       db
         .select({
-          count: count()                                               // Se obtiene el número total de comentarios para el video
+          count: count()                                               // Se obtiene el número total de comentarios para el video sin contar las replies
         })
         .from(comments) 
-        .where(eq(comments.videoId, videoId)),                         
+        .where(and(
+          eq(comments.videoId, videoId),
+          isNull(comments.parentId)
+        )),                         
 
       db                                                               // Consulta principal para obtener los comentarios con información adicional.
-        .with(viewerReactions)                                             // Se añade la subconsulta de viewerReactions (reacciones del usuario actual)
+        .with(viewerReactions, replies)                                    // Se añade la subconsulta de viewerReactions (reacciones del usuario actual) y de replies (conteo de respuestas)
         .select({
           ...getTableColumns(comments),                                    // Se seleccionan las columnas de la tabla comments
           user: users,                                                     // Se añade la relación con la tabla users
           viewerReaction: viewerReactions.type,                            // Selecciona la reacción del usuario actual      
+          replyCount: replies.count,                                       // Se selecciona el conteo de respuestas del comentario actual
           likeCount: db.$count(                                            // Se obtiene el número de likes para cada comentario
             commentReactions,                                                       // Para ellos buscamos en commentReactions
             and(
@@ -130,6 +145,7 @@ export const commentsRouter = createTRPCRouter({
         .from(comments)                                                // De la tabla comments 
         .where(and(
           eq(comments.videoId, videoId),                               // se  mostrarán solo comentarios del video especificado.
+          isNull(comments.parentId),                                   // Solo se mostrarán los comentarios que no sean respuestas
           cursor                                                       // Si hay un cursor. Este cursor se usa para obtener solo los comentarios más antiguos
             ? or(
               lt(comments.updatedAt, cursor.updatedAt),                // Filtra los comentarios cuya fecha de actualización (updatedAt) sea anterior (<) a la del cursor.
@@ -142,6 +158,7 @@ export const commentsRouter = createTRPCRouter({
         ))
         .innerJoin(users, eq(comments.userId, users.id))               // Se añade la info del user que hizo el comentario
         .leftJoin(viewerReactions, eq(comments.id, viewerReactions.commentId)) // Unimos con las reacciones del usuario.
+        .leftJoin(replies, eq(comments.id, replies.parentId))          // Unimos el conteo de respuestas del comentario.
         .orderBy(desc(comments.updatedAt), desc(comments.id))          // Ordena los comentarios de forma descendente por fecha de actualización y luego por id.
         .limit(limit + 1)                                              // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
       

@@ -191,6 +191,11 @@ export const CommentItem = ({
             }}
           />
         </div>
+      )}
+      {comment.replyCount > 0 && variant === "comment" && (
+        <div className="pl-14">
+          {comment.replyCount} Replies
+        </div>
       )}      
     </div>
   )
