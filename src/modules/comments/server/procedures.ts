@@ -31,18 +31,33 @@ export const commentsRouter = createTRPCRouter({
     }),
   create: protectedProcedure
     .input(z.object({
+      parentId: z.string().uuid().nullish(), // Puede o no venir
       videoId: z.string().uuid(),
       value: z.string(),
     }))
     .mutation(async({ input, ctx }) => {
-      const { videoId, value } = input;
+      const { parentId, videoId, value } = input;
       const { id: userId } = ctx.user;
 
-      const [createdComment] = await db               
+      const [existingComment] = await db
+        .select()
+        .from(comments)
+        .where(inArray(comments.id, parentId ? [parentId] : []))  //Buscamos un comentario cuyo id se corresponda con el parentId (reply)
+
+      if(!existingComment && parentId){
+        throw new TRPCError({ code: "NOT_FOUND" })                // No se encontró un comentario con el parentId proporcionado
+      }
+
+      if(existingComment?.parentId && parentId){
+        throw new TRPCError({ code: "BAD_REQUEST" })              // Previene la creación de respuestas anidadas. No se permite crear una respuesta a esta respuesta, 
+      }
+
+      const [createdComment] = await db                           // Si no se encontró un comentario con el parentId proporcionado, se crea un nuevo comentario
         .insert(comments)                             
           .values({
             userId,
             videoId,
+            parentId,
             value
           })
           .returning()

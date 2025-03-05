@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { CommentGetManyOutput } from "../../types"
 import UserAvatar from "@/components/user-avatar"
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow, set } from "date-fns"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -14,19 +14,26 @@ import { Button } from "@/components/ui/button";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { CommentForm } from "./comment-form";
 
 
 interface CommentItemProps {
-  comment: CommentGetManyOutput["items"][number] // la interface esta apuntado al objeto items del return del procedimiento getMany de comments [0]
+  comment: CommentGetManyOutput["items"][number], // la interface esta apuntado al objeto items del return del procedimiento getMany de comments [0]
+  variant?: "reply" | "comment",
 }
 
 export const CommentItem = ({
-  comment
+  comment,
+  variant = "comment"
 }: CommentItemProps) => {
 
   const { userId } = useAuth();
   const clerk = useClerk();
   const utils = trpc.useUtils();
+
+  const [isReplyOpen, setIsReplyOpen] = useState(false);       // Esta variable se utiliza para controlar la visibilidad del componente Reply
+  const [isRepliesOpen, setIsRepliesOpen] = useState(false);   // Esta variable se utiliza para controlar la visibilidad del componente Replies
 
   const remove = trpc.comments.remove.useMutation({
     onSuccess: () => {
@@ -128,9 +135,22 @@ export const CommentItem = ({
                 {comment.dislikeCount}
               </span>
             </div>
+
+            {variant === "comment" && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8"
+                onClick={() => setIsReplyOpen(true)}
+              >
+                Reply
+              </Button>
+            )}
+
           </div>
         </div>
 
+        {/* DropdownMenu para el botón de más opciones del comentario */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
@@ -142,10 +162,12 @@ export const CommentItem = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => {}}>
-              <MessageSquareIcon className="size-4"/>
-              Reply
-            </DropdownMenuItem>
+            {variant === "comment" && (
+              <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
+                <MessageSquareIcon className="size-4"/>
+                Reply
+              </DropdownMenuItem>
+            )}
             {comment.user.clerkId === userId && (
               <DropdownMenuItem onClick={() => remove.mutate({ id: comment.id })}>
                 <Trash2Icon className="size-4" />
@@ -155,6 +177,21 @@ export const CommentItem = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {isReplyOpen && variant === "comment" && ( // Si se le dio al boton de reply (tanto en el boton como el dropdownmenu) -> <CommentForm /> con props diferentes 
+        <div className="mt-4 pl-14">
+          <CommentForm 
+            variant="reply"
+            parentId={comment.id}
+            videoId={comment.videoId}
+            onCancel={() => setIsReplyOpen(false)} // Cierra el <CommentForm />
+            onSuccess={() => {                     
+              setIsReplyOpen(false);
+              setIsRepliesOpen(true)
+            }}
+          />
+        </div>
+      )}      
     </div>
   )
 }
