@@ -152,7 +152,7 @@ export const CommentItem = ({
         </div>
 
         {/* DropdownMenu para el botón de más opciones del comentario */}
-        {comment.user.clerkId !== userId && variant === "reply" && (
+      
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button
@@ -178,7 +178,7 @@ export const CommentItem = ({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        
       </div>
 
       {isReplyOpen && variant === "comment" && ( // Si se le dio al boton de reply (tanto en el boton como el dropdownmenu) -> <CommentForm /> con props diferentes 
