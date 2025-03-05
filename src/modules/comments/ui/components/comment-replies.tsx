@@ -1,7 +1,8 @@
 import { DEFAULT_LIMIT } from "@/constant";
 import { trpc } from "@/trpc/client";
-import { Loader2Icon } from "lucide-react";
+import { CornerDownRight, CornerDownRightIcon, Loader2Icon } from "lucide-react";
 import { CommentItem } from "./comment-item";
+import { Button } from "@/components/ui/button";
 
 
 interface CommentRepliesProps {
@@ -11,7 +12,13 @@ interface CommentRepliesProps {
 
 const CommentReplies = ({ parentId, videoId }: CommentRepliesProps) => {
 
-  const { data, isLoading } = trpc.comments.getMany.useInfiniteQuery({
+  const { 
+    data, 
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = trpc.comments.getMany.useInfiniteQuery({
     limit: DEFAULT_LIMIT,
     videoId,
     parentId
@@ -39,7 +46,17 @@ const CommentReplies = ({ parentId, videoId }: CommentRepliesProps) => {
             ))
         }
       </div>
-      
+      {hasNextPage && (
+        <Button
+          variant="tertiary"
+          size="sm"
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        >
+          <CornerDownRightIcon  />
+          Show more replies
+        </Button>
+      )}   
     </div>
   )
 }

@@ -77,7 +77,7 @@ export const CommentItem = ({
       <div className="flex gap-4">
         <Link href={`/users/${comment.userId}`}>
           <UserAvatar 
-            size="lg"
+            size={variant === "reply" ? "sm" : "lg"}
             imageUrl={comment.user.imageUrl}
             name={comment.user.name}
           />
