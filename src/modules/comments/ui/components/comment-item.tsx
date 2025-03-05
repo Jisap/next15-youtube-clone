@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { CommentForm } from "./comment-form";
+import CommentReplies from "./comment-replies";
 
 
 interface CommentItemProps {
@@ -32,8 +33,8 @@ export const CommentItem = ({
   const clerk = useClerk();
   const utils = trpc.useUtils();
 
-  const [isReplyOpen, setIsReplyOpen] = useState(false);       // Esta variable se utiliza para controlar la visibilidad del componente Reply
-  const [isRepliesOpen, setIsRepliesOpen] = useState(false);   // Esta variable se utiliza para controlar la visibilidad del componente Replies
+  const [isReplyOpen, setIsReplyOpen] = useState(false);       // Esta variable se utiliza para controlar la visibilidad del componente Reply -> CommentForm
+  const [isRepliesOpen, setIsRepliesOpen] = useState(false);   // Esta variable se utiliza para controlar la visibilidad del componente Replies -> CommentReplies
 
   const remove = trpc.comments.remove.useMutation({
     onSuccess: () => {
@@ -203,6 +204,12 @@ export const CommentItem = ({
             {comment.replyCount} Replies
           </Button>
         </div>
+      )}
+      {comment.replyCount > 0 && variant === "comment" && isRepliesOpen && (
+        <CommentReplies 
+          parentId={comment.id}
+          videoId={comment.videoId}
+        />
       )}      
     </div>
   )
