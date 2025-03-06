@@ -9,6 +9,7 @@ import { videoReactionsRouter } from '@/modules/video-reactions/server/procedure
 import { SubscriptionsRouter } from '@/modules/subscriptions/server/procedures';
 import { commentsRouter } from '@/modules/comments/server/procedures';
 import { commentReactionsRouter } from '@/modules/comments-reactions/server/procedures';
+import { suggestionRouter } from '@/modules/suggestions/server/procedures';
 
 
 
@@ -21,6 +22,7 @@ export const AppRouter = createTRPCRouter({ // Se crea un enrutador tRPC
   subscriptions: SubscriptionsRouter,
   comments: commentsRouter,
   commentsReactions: commentReactionsRouter,
+  suggestions: suggestionRouter,
 });
 
 export type AppRouter = typeof AppRouter
