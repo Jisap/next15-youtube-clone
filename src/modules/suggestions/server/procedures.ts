@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { videos } from "@/db/schema";
+import { users, videoReactions, videos, videoViews } from "@/db/schema";
 
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, desc } from "drizzle-orm";
+import { eq, and, or, lt, desc, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -35,9 +35,25 @@ export const suggestionRouter = createTRPCRouter({
       }
       
       const data = await db
-        .select()
-        .from(videos)                                                   // Solo se obtienen los videos 
-        .where(and(
+        .select({                                                       // De la tabla videos se seleccionan los campos:
+          ...getTableColumns(videos),                                   // props relativas a la tabla videos.
+          user: users,                                                  // se agrega la relacion de usuarios
+          viewCount: db.$count(                                                                 
+            videoViews, eq(videoViews.videoId, videos.id)),             // videoCount: número de visualizaciones del video.
+          likeCount: db.$count(                                         // likeCount: número de likes del video.
+            videoReactions, and(                                                 // En la tabla videoReactions se filtran los likes.
+              eq(videoReactions.videoId, videos.id),                             // correspondientes al video
+              eq(videoReactions.type, "like")                                    // con el tipo de reaction "like".
+            )),
+          dislikeCount: db.$count(                                      // dislikeCount: número de dislikes del video.
+            videoReactions, and(                                                 // En la tabla videoReactions se filtran los likes.
+              eq(videoReactions.videoId, videos.id),                             // correspondientes al video
+              eq(videoReactions.type, "dislike")                                 // con el tipo de reaction "dislike".
+            ))  
+        })
+        .from(videos)                                                   
+        .innerJoin(users, eq(videos.userId, users.id))                  // Se agrega el usuario que creó el video.
+        .where(and(                                                     // Solo se obtienen los videos
           existingVideo.categoryId
             ? eq(videos.categoryId, existingVideo.categoryId)           // que tengan la misma categoría que el video especificado.
             : undefined                                                 // Sino tienen categoria se devuelve todos los videos.
