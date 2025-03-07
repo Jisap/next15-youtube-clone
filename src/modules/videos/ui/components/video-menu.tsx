@@ -16,7 +16,7 @@ interface VideoMenuProps {
 
 const VideoMenu = ({
   videoId,
-  variant,
+  variant="ghost",
   onRemove
  }: VideoMenuProps) => {
 

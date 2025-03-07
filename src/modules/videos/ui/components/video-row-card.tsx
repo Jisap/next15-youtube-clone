@@ -117,7 +117,25 @@ const VideoRowCard = ({
                 </Tooltip>
               </>
             )}
+            {size === "compact" && (
+              <UserInfo 
+                size="sm"
+                name={data.user.name}
+              />
+            )}
+            {size === "compact" && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {data.viewCount} views · {data.likeCount} likes
+              </p>
+            )}
           </Link>
+
+          <div className="flex-none">
+            <VideoMenu 
+              videoId={data.id}
+              onRemove={onRemove}
+            />
+          </div>
         </div>
       </div>
     </div>

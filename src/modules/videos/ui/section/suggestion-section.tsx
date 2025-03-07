@@ -26,7 +26,7 @@ const SuggestionSection = ({ videoId }: SuggestionSectionProps) => {
             <VideoRowCard 
               key={video.id}
               data={video}
-              size="default"
+              size="compact"
             />
           )
         )
