@@ -43,7 +43,7 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
 export const VideoRowCardSkeleton = () => {
   return (
     <div>
-      Skeleton
+      <Skeleton />
     </div>
   )
 }
@@ -54,6 +54,20 @@ const VideoRowCard = ({
   onRemove,
   size,
 }: VideoRowCardProps) => {
+
+  const compactViews = useMemo(() => { // Intl.NumberFormat es una API de JavaScript que permite formatear números de acuerdo con las convenciones de un idioma específico.
+    return Intl.NumberFormat("en", {   // 1000 -> 1k, 1000000 -> 1m, 1000000000 -> 1b
+      notation: "compact"
+    }).format(data.viewCount)
+  },[data.viewCount]);
+
+  const compactLikes = useMemo(() => { 
+    return Intl.NumberFormat("en", {   
+      notation: "compact"
+    }).format(data.likeCount)
+  }, [data.likeCount])
+
+
   return (
     <div className={videoRowCardVariants({ size })}>
       <Link 
@@ -85,7 +99,7 @@ const VideoRowCard = ({
             </h3>
             {size === "default" && (
               <p className="text-xs text-muted-foreground mt-1">
-                {data.viewCount} views · {data.likeCount} likes
+                {compactViews} views · {compactLikes} likes
               </p>
             )}
             {size === "default" && (
@@ -125,7 +139,7 @@ const VideoRowCard = ({
             )}
             {size === "compact" && (
               <p className="text-xs text-muted-foreground mt-1">
-                {data.viewCount} views · {data.likeCount} likes
+                {compactViews} views · {compactLikes} likes
               </p>
             )}
           </Link>
