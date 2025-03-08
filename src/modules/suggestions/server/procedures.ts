@@ -4,7 +4,7 @@ import { users, videoReactions, videos, videoViews } from "@/db/schema";
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, desc, getTableColumns } from "drizzle-orm";
+import { eq, and, or, lt, desc, getTableColumns, not } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -54,6 +54,7 @@ export const suggestionRouter = createTRPCRouter({
         .from(videos)                                                   
         .innerJoin(users, eq(videos.userId, users.id))                  // Se agrega el usuario que creó el video.
         .where(and(                                                     // Solo se obtienen los videos
+          not(eq(videos.id, existingVideo.id)),                         // que no sean el video especificado.
           existingVideo.categoryId
             ? eq(videos.categoryId, existingVideo.categoryId)           // que tengan la misma categoría que el video especificado.
             : undefined                                                 // Sino tienen categoria se devuelve todos los videos.
