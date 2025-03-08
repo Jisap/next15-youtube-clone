@@ -143,6 +143,17 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
       toast.error(error.message);
     }
   });  
+
+  const revalidate = trpc.videos.revalidate.useMutation({                   // Mutación para revalidar los datos del video en Mux
+    onSuccess: () => {
+      utils.studio.getMany.invalidate();                                // Invalida la consulta de todos los videos del studio para actualizar el estado de la lista.
+      utils.studio.getOne.invalidate({ id: videoId });                  // Invalida la consulta del video específico para actualizar el estado del video.
+      toast.success("Video revalidated");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });  
   
   const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({   // Mutación para restaurar la miniatura del video.
     onSuccess: () => {
@@ -228,6 +239,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                   <DropdownMenuItem onClick={() => remove.mutate({ id: videoId })}>
                     <TrashIcon className="size-4 mr-2"/>
                     Delete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => revalidate.mutate({ id: videoId })}>
+                    <RotateCcwIcon className="size-4 mr-2" />
+                    Revalidate
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

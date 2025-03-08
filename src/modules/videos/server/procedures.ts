@@ -126,6 +126,63 @@ export const videosRouter = createTRPCRouter({
       })
       return { workflowRunId }
     }),
+  revalidate: protectedProcedure             // Verifica el estado de procesamiento en Mux y actualiza la bd con información crítica: muxStatus, muxPlayBackId
+    .input(z.object({ id: z.string() }))                                  
+    .mutation(async ({ ctx, input }) => {                           // Se verifica que el video exista y pertenezca al usuario autenticado.
+      const { id: userId } = ctx.user;                                    
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(and(
+          eq(videos.id, input.id),
+          eq(videos.userId, userId)
+        ))
+
+      if (!existingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND" })
+      }
+
+      if(!existingVideo.muxUploadId){
+        throw new TRPCError({ code: "BAD_REQUEST" })
+      }
+
+      const upload = await mux.video.uploads.retrieve(              // Revisa que el video tenga un muxUploadId (identificador de subida en Mux). 
+        existingVideo.muxUploadId
+      )
+
+      if(!upload || !upload.asset_id){
+        throw new TRPCError({ code: "BAD_REQUEST" })
+      }
+
+      const asset = await mux.video.assets.retrieve(                 // Con el muxUploadId se obtiene el asset (video) en Mux
+        upload.asset_id
+      )
+
+      if(!asset){ 
+        throw new TRPCError({ code: "BAD_REQUEST" })
+      }
+
+      const playbackId = asset.playback_ids?.[0].id                  // Desde el asset se extrae el playback_id (identificador de reproducción en Mux) y luego el status
+      const duration = asset.duration                                // También se extrae la duración del video
+        ? Math.round(asset.duration * 1000) 
+        : 0;
+
+      const [updatedVideo] = await db                                // Actualización en base de datos. Esto permite al frontend saber si el video está listo y cómo reproducirlo.   
+        .update(videos)
+        .set({
+          muxStatus: asset.status,    // Estado actual del video
+          muxPlayBackId: playbackId,  // Usado por el frontend para generar la URL de reproducción.
+          muxAssetId: asset.id,       // Referencia al recurso en Mux.
+          duration,                   // Duración del video.
+        })
+        .where(and(
+          eq(videos.id, input.id),
+          eq(videos.userId, userId)
+        ))
+        .returning()
+
+      return updatedVideo
+    }),
   restoreThumbnail: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async({ ctx, input}) => {
