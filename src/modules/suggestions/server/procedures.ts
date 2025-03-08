@@ -55,6 +55,7 @@ export const suggestionRouter = createTRPCRouter({
         .innerJoin(users, eq(videos.userId, users.id))                  // Se agrega el usuario que creó el video.
         .where(and(                                                     // Solo se obtienen los videos
           not(eq(videos.id, existingVideo.id)),                         // que no sean el video especificado.
+          eq(videos.visibility, "public"),                              // que sean públicos.
           existingVideo.categoryId
             ? eq(videos.categoryId, existingVideo.categoryId)           // que tengan la misma categoría que el video especificado.
             : undefined                                                 // Sino tienen categoria se devuelve todos los videos.
