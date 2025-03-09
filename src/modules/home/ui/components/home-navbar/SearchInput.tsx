@@ -1,7 +1,13 @@
+"use client"
+
 import { SearchIcon } from "lucide-react"
+import { set } from 'date-fns';
+import { useState } from "react";
 
 export const SearchInput = () => {
-  // TODO: add search functionality
+
+  const [value, set ] = useState("");
+
   return (
     <form className="flex w-full max-w-[600px]">
       <div className="relative w-full">
