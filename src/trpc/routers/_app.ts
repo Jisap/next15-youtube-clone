@@ -10,6 +10,7 @@ import { SubscriptionsRouter } from '@/modules/subscriptions/server/procedures';
 import { commentsRouter } from '@/modules/comments/server/procedures';
 import { commentReactionsRouter } from '@/modules/comments-reactions/server/procedures';
 import { suggestionRouter } from '@/modules/suggestions/server/procedures';
+import { searchRouter } from '@/modules/search/server/procedures';
 
 
 
@@ -23,6 +24,7 @@ export const AppRouter = createTRPCRouter({ // Se crea un enrutador tRPC
   comments: commentsRouter,
   commentsReactions: commentReactionsRouter,
   suggestions: suggestionRouter,
+  search: searchRouter,
 });
 
 export type AppRouter = typeof AppRouter
