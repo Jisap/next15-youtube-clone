@@ -20,7 +20,7 @@ export const VideoGridCardSkeleton = () => {
   )
 }
 
-const VideoGridCard = ({
+export const VideoGridCard = ({
   data,
   onRemove,
 }: VideoGridCardProps) => {
@@ -46,4 +46,3 @@ const VideoGridCard = ({
   )
 }
 
-export default VideoGridCard

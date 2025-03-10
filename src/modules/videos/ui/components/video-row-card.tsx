@@ -40,7 +40,7 @@ interface VideoRowCardProps extends VariantProps<typeof videoRowCardVariants> {
   onRemove?:() => void;
 }
 
-export const VideoRowCardSkeleton = ({ size }: VariantProps<typeof videoRowCardVariants>) => {
+export const VideoRowCardSkeleton = ({ size = "default" }: VariantProps<typeof videoRowCardVariants>) => {
   return (
     <div className={videoRowCardVariants({ size })}>
       {/* Thumbnail skeleton */}
@@ -77,10 +77,10 @@ export const VideoRowCardSkeleton = ({ size }: VariantProps<typeof videoRowCardV
 }
 
 
-const VideoRowCard = ({
+export const VideoRowCard = ({
   data,
   onRemove,
-  size,
+  size="default",
 }: VideoRowCardProps) => {
 
   const compactViews = useMemo(() => { // Intl.NumberFormat es una API de JavaScript que permite formatear números de acuerdo con las convenciones de un idioma específico.
@@ -184,4 +184,3 @@ const VideoRowCard = ({
   )
 }
 
-export default VideoRowCard

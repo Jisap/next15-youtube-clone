@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { videos } from "@/db/schema";
+import { users, videoReactions, videos, videoViews } from "@/db/schema";
 
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, desc, ilike } from "drizzle-orm";
+import { eq, and, or, lt, desc, ilike, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -27,8 +27,24 @@ export const searchRouter = createTRPCRouter({
       const { cursor, limit, query, categoryId } = input;               // Se extraen los valores de input (query, cursor, limit, categoryId).
 
         const data = await db
-          .select()
+          .select({                                                     // De la tabla videos se seleccionan los campos:
+            ...getTableColumns(videos),                                 // props relativas a la tabla videos.                              
+            user: users,                                                // se agrega la relacion de usuarios
+            viewCount: db.$count(                                                                 
+              videoViews, eq(videoViews.videoId, videos.id)),           // videoCount: número de visualizaciones del video.
+              likeCount: db.$count(                                         // likeCount: número de likes del video.
+                videoReactions, and(                                                 // En la tabla videoReactions se filtran los likes.
+                  eq(videoReactions.videoId, videos.id),                             // correspondientes al video
+                  eq(videoReactions.type, "like")                                    // con el tipo de reaction "like".
+                )),
+              dislikeCount: db.$count(                                      // dislikeCount: número de dislikes del video.
+                videoReactions, and(                                                 // En la tabla videoReactions se filtran los likes.
+                  eq(videoReactions.videoId, videos.id),                             // correspondientes al video
+                  eq(videoReactions.type, "dislike")                                 // con el tipo de reaction "dislike".
+                ))  
+          })
           .from(videos)                                                 // Solo se obtienen los videos 
+          .innerJoin(users, eq(videos.userId, users.id))
           .where(and(
             ilike(videos.title, `%${query}%`),                          // que coincidan con el query proporcionado,
             categoryId ? eq(videos.categoryId, categoryId) : undefined, // y que pertenecen a la categoría proporcionada.
