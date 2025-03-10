@@ -1,3 +1,5 @@
+import SearchView from "@/modules/search/ui/views/search-view";
+import { HydrateClient, trpc } from "@/trpc/server";
 
 
 
@@ -15,10 +17,15 @@ const Search = async({searchParams}: PageProps) => {
 
   const { query, categoryId } = await searchParams;
 
+  void trpc.categories.getMany.prefetch();
+
   return (
-    <div>
-      Searchin for { query } in category: { categoryId }
-    </div>
+    <HydrateClient>
+      <SearchView 
+        query={query}
+        categoryId={categoryId}
+      />
+    </HydrateClient>
   )
 }
 
