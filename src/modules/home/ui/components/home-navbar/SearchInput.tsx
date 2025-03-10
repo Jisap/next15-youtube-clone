@@ -3,10 +3,30 @@
 import { SearchIcon } from "lucide-react"
 import { set } from 'date-fns';
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { APP_URL } from "@/constant";
+
 
 export const SearchInput = () => {
 
-  const [value, set ] = useState("");
+  const router = useRouter();
+  const [value, setValue ] = useState("");
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const url = new URL("/search", APP_URL || "http:localhost:3000");
+    const newQuery = value.trim();
+    
+    url.searchParams.set("query", encodeURIComponent(newQuery));
+
+    if(newQuery === ""){
+      url.searchParams.delete("query");
+    }
+
+    setValue(newQuery);
+    router.push(url.toString());
+  }
 
   return (
     <form className="flex w-full max-w-[600px]">
