@@ -17,11 +17,28 @@ interface ResultsSectionProps {
 
 export const ResultsSection = (props: ResultsSectionProps) => {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={<ResultsSectionSkeleton />}>
       <ErrorBoundary fallback={<p>Error</p>}>
         <ResultsSectionSuspense {...props}/>
       </ErrorBoundary>
     </Suspense>
+  )
+};
+
+const ResultsSectionSkeleton = () => {
+  return (
+    <div>
+      <div className="hidden flex-col gap-4 md:flex">
+        {Array.from({ length: 5 }).map((_,index) => (
+          <VideoRowCardSkeleton key={index} />
+        ))}
+      </div>
+      <div className="flex flex-col gap-4 gap-y-10pt-6 md:hidden">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <VideoGridCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
   )
 }
 
