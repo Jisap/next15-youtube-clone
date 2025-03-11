@@ -2,7 +2,7 @@ import { DEFAULT_LIMIT } from "@/constant";
 import VideoView from "@/modules/videos/ui/views/video.view";
 import { HydrateClient, trpc } from "@/trpc/server";
 
-
+export const dynamic = "force-dynamic"; // Forces dynamic rendering (Server-side rendering)
 
 interface PageProps {
   params: Promise<{

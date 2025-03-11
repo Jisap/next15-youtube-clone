@@ -3,7 +3,7 @@
 import { SearchIcon, XIcon } from "lucide-react"
 import { set } from 'date-fns';
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { APP_URL } from "@/constant";
 import { Button } from "@/components/ui/button";
 
@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 export const SearchInput = () => {
 
   const router = useRouter();
-  const [value, setValue ] = useState("");
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
+  const [value, setValue ] = useState(query); // Establece el valor inicial del campo de búsqueda con el valor de la URL.
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
