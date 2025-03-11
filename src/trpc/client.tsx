@@ -26,9 +26,8 @@ function getQueryClient() {                                                     
 
 function getUrl() {                                                                // Esta función determina la URL base para las solicitudes tRPC.  
   const base = (() => {
-    if (typeof window !== 'undefined') return '';                                  // En el navegador a URL base es vacía (se usa la ruta relativa /api/trpc).
-    if (APP_URL) return `https://${APP_URL}`;                       // En el servidor, se utiliza process.env.VERCEL_URL si está disponible (para despliegues en Vercel) 
-    return 'http://localhost:3000';                                                // o http://localhost:3000 en desarrollo local.
+    if (typeof window !== 'undefined') return '';                                  // En el navegador a URL base es vacía (se usa la ruta relativa /api/trpc). 
+    return APP_URL;                                                                // En el server se usa la URL definida en constants: APP_URL = process.env.VERCEL_URL || "http://localhost:3000"
   })();
   return `${base}/api/trpc`;
 }
