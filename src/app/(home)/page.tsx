@@ -4,7 +4,9 @@ import HomeView from "@/modules/home/ui/views/home-view";
 import { HydrateClient, trpc } from "@/trpc/server";
 
 
-export const dynamic = "force-dynamic";
+// Nos aseguramos que la página se renderice en cada solicitud. Es util cuando los datos cambian con frecuencia.
+// Se evita asi que la página se almacene en caché, asegurando que siempre se obtengan los datos más recientes del servidor.
+export const dynamic = "force-dynamic"; 
 
 interface PageProps {
   searchParams: Promise<{categoryId?: string}>;

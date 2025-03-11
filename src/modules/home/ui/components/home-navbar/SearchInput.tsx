@@ -13,6 +13,7 @@ export const SearchInput = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
+  const categoryId = searchParams.get("categoryId") || "";
   const [value, setValue ] = useState(query); // Establece el valor inicial del campo de búsqueda con el valor de la URL.
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,6 +23,10 @@ export const SearchInput = () => {
     const newQuery = value.trim();
     
     url.searchParams.set("query", encodeURIComponent(newQuery));
+
+    if(categoryId){
+      url.searchParams.set("categoryId", categoryId); 
+    }
 
     if(newQuery === ""){
       url.searchParams.delete("query");
