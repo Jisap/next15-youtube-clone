@@ -24,12 +24,12 @@ export const SearchInput = () => {
     
     url.searchParams.set("query", encodeURIComponent(newQuery));
 
-    if(categoryId){
+    if(categoryId){                                      // Si se proporciona una categoría, se añade a la URL.
       url.searchParams.set("categoryId", categoryId); 
     }
 
-    if(newQuery === ""){
-      url.searchParams.delete("query");
+    if(newQuery === ""){                                 // Si el campo de búsqueda está vacío, 
+      url.searchParams.delete("query");                  // se elimina el query de la petición para asi evitar una busqueda sin contenido.
     }
 
     setValue(newQuery);
