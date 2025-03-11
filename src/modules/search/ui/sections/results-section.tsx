@@ -6,6 +6,8 @@ import { trpc } from "@/trpc/client";
 import { VideoRowCard, VideoRowCardSkeleton }from '@/modules/videos/ui/components/video-row-card';
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
 import { InfiniteScroll } from "@/components/infinite-scroll";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 
 interface ResultsSectionProps {
@@ -13,7 +15,18 @@ interface ResultsSectionProps {
   categoryId: string | undefined;
 }
 
-export const ResultsSection = ({ query, categoryId }: ResultsSectionProps) => {
+export const ResultsSection = (props: ResultsSectionProps) => {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <ErrorBoundary fallback={<p>Error</p>}>
+        <ResultsSectionSuspense {...props}/>
+      </ErrorBoundary>
+    </Suspense>
+  )
+}
+
+
+export const ResultsSectionSuspense = ({ query, categoryId }: ResultsSectionProps) => {
   
   const isMobile = useIsMobile();
 
