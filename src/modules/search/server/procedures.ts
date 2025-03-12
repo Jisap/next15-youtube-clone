@@ -46,6 +46,7 @@ export const searchRouter = createTRPCRouter({
           .from(videos)                                                 // Solo se obtienen los videos 
           .innerJoin(users, eq(videos.userId, users.id))
           .where(and(
+            eq(videos.visibility, "public"),                            // que sean públicos (visibility = "public")
             ilike(videos.title, `%${query}%`),                          // que coincidan con el query proporcionado,
             categoryId ? eq(videos.categoryId, categoryId) : undefined, // y que pertenecen a la categoría proporcionada.
             cursor                                                      // y si hay un cursor. Este cursor se usa para obtener solo los videos más antiguos
