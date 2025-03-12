@@ -13,6 +13,77 @@ import { workflow } from "@/lib/workflow";
 
 
 export const videosRouter = createTRPCRouter({
+  getManyTrending: baseProcedure                                          // Indica que este endpoint no requiere autenticación.
+    .input(                                                           // Valida los parámetros de entrada:
+      z.object({  
+        cursor: z.object({                                            // 1º Cursor que es un objeto con:
+          id: z.string().uuid(),                                      // Identificador del último video cargado.
+          viewCount: z.number()                                         // Fecha de actualización del último video cargado.  
+        })
+          .nullish(),
+        limit: z.number().min(1).max(100),                            // Y 2º Limit que es el número de videos a recuperar 
+      })
+    )
+    .query(async ({ input }) => {                                     // Validados los datos se procede a la consulta a la base de datos.
+
+      const { cursor, limit } = input;                                // Se extraen los valores de input (cursor, limit).
+
+      const viewCountSubquery = db.$count(                            // Se crea una subquery para obtener el número de visualizaciones de los videos.
+        videoViews, eq(videoViews.videoId, videos.id)
+      ) 
+
+      const data = await db
+        .select({                                                     // De la tabla videos se seleccionan los campos:
+          ...getTableColumns(videos),                                 // props relativas a la tabla videos.                              
+          user: users,                                                // se agrega la relacion de usuarios
+          viewCount: viewCountSubquery,                               // videoCount: número de visualizaciones del video.
+          likeCount: db.$count(                                       // likeCount: número de likes del video.
+            videoReactions, and(                                              // En la tabla videoReactions se filtran los likes.
+              eq(videoReactions.videoId, videos.id),                          // correspondientes al video
+              eq(videoReactions.type, "like")                                 // con el tipo de reaction "like".
+            )),
+          dislikeCount: db.$count(                                    // dislikeCount: número de dislikes del video.
+            videoReactions, and(                                              // En la tabla videoReactions se filtran los likes.
+              eq(videoReactions.videoId, videos.id),                          // correspondientes al video
+              eq(videoReactions.type, "dislike")                              // con el tipo de reaction "dislike".
+            ))
+        })
+        .from(videos)                                                 // Solo se obtienen los videos 
+        .innerJoin(users, eq(videos.userId, users.id))                // (se agrega la relación de usuarios)
+        .where(and(
+          eq(videos.visibility, "public"),                            // que sean públicos (visibility = "public")
+          
+          cursor                                                      // Y si hay un cursor, (Este cursor se usa para obtener los videos con mas visualizaciones)
+            ? or(                                                     // se combinan dos condiciones  
+              lt(viewCountSubquery, cursor.viewCount),                // 1. filtra los videos cuyo nº de visualizaciones (viewCountSubquery) sea menor (<) que la del cursor. Esto asegura que solo se obtengan videos con menos visualizaciones que el último video de la página anterior.
+              and(                                                    // 2. Si dos videos tienen el mismo nº de visualizaciones, se usa id < cursor.id como desempate.
+                eq(viewCountSubquery, cursor.viewCount),                   // Verifica que el número de visualizaciones del video sea igual al del cursor.              
+                lt(videos.id, cursor.id)                                   // Filtra los videos cuyo ID es menor que el del cursor. Esto asegura que solo se obtengan videos más antiguos (con un ID menor) que el último video de la página anterior.
+              )
+            )
+            : undefined,
+        )).orderBy(desc(viewCountSubquery), desc(videos.id))          // Se ordena en orden descendente por nº de visualizaciones y luego por id.
+        .limit(limit + 1)                                             // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
+
+
+      const hasMore = data.length > limit;                            // Si data contiene más elementos(limit+1) de los solicitados (limit), significa que hay más videos disponibles.
+
+      const items = hasMore ? data.slice(0, -1) : data;               // Si hay más elementos, se elimina el último para no enviarlo al cliente y así no superar el limit 
+
+      const lastItem = items[items.length - 1];                       // Se extrae el último elemento de items para establecer el cursor de la siguiente página.
+
+      const nextCursor = hasMore                                      // Si hasMore = true se crea un objeto nextCursor con el id y el viewCount del lastItem
+        ? {
+          id: lastItem.id,
+          viewCount: lastItem.viewCount,
+        }
+        : null
+
+      return {
+        items,
+        nextCursor, // Este cursor se utilizará en la próxima solicitud para obtener los siguientes videos.
+      }
+    }),
   getMany: baseProcedure                                                // Indica que este endpoint no requiere autenticación.
     .input(                                                             // Valida los parámetros de entrada:
       z.object({
