@@ -65,13 +65,13 @@ export const videosRouter = createTRPCRouter({
             .limit(limit + 1)                                             // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
   
   
-          const hasMore = data.length > limit;                            // Si data contiene más elementos de los solicitados (limit), significa que hay más videos disponibles.
+          const hasMore = data.length > limit;                            // Si data contiene más elementos(limit+1) de los solicitados (limit), significa que hay más videos disponibles.
   
           const items = hasMore ? data.slice(0, -1) : data;               // Si hay más elementos, se elimina el último para no enviarlo al cliente y así no superar el limit 
   
           const lastItem = items[items.length - 1];                       // Se extrae el último elemento de items para establecer el cursor de la siguiente página.
   
-          const nextCursor = hasMore
+      const nextCursor = hasMore                                          // Si hasMore = true se crea un objeto nextCursor con el id y updatedAt del lastItem
             ? {
               id: lastItem.id,
               updatedAt: lastItem.updatedAt,
@@ -80,7 +80,7 @@ export const videosRouter = createTRPCRouter({
   
           return {
             items,
-            nextCursor,
+            nextCursor, // Este cursor se utilizará en la próxima solicitud para obtener los siguientes videos.
           }
     }),
   getOne: baseProcedure
