@@ -16,7 +16,7 @@ interface HomeVideosSectionProps {
 
 export const HomeVideosSection = (props: HomeVideosSectionProps) => {
   return (
-    <Suspense fallback={<HomeVideosSectionSkeleton />}>
+    <Suspense key={props.categoryId} fallback={<HomeVideosSectionSkeleton />}>
       <ErrorBoundary fallback={<p>Error</p>}>
         <HomeVideosSectionSuspense {...props} />
       </ErrorBoundary>
