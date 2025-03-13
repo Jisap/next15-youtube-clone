@@ -8,6 +8,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
 import { workflow } from "@/lib/workflow";
+import { view } from "drizzle-orm/sqlite-core";
 
 
 
@@ -48,6 +49,7 @@ export const videosRouter = createTRPCRouter({
       // 4	  104	      201                        { userId: 101 }, ]
 
       const data = await db
+        .with(viewerSubcription)                                        // Se incluye la CTE `viewer_subscriptions` en la consulta principal
         .select({                                                       // De la tabla videos se seleccionan los campos:
           ...getTableColumns(videos),                                   // props relativas a la tabla videos.                              
           user: users,                                                  // se agrega la relacion de usuarios
