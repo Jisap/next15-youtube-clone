@@ -13,7 +13,7 @@ const items = [
     icon: HomeIcon,
   },
   {
-    title: "Subscriptions",
+    title: "Subscribed",
     url: "/feed/subscribed",
     icon: PlaySquareIcon,
     auth: true,
