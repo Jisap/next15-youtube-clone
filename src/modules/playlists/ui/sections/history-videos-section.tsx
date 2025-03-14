@@ -22,7 +22,7 @@ export const HistoryVideosSection = () => {
 
 const HistoryVideosSectionSkeleton = () => {
   return (
-    <div>
+    <>
       <div className="flex flex-col gap-4 gap-y-10 md:hidden">
         {Array.from({length: 18}).map((_, index) => (
           <VideoGridCardSkeleton
@@ -30,7 +30,7 @@ const HistoryVideosSectionSkeleton = () => {
           />
         ))}
       </div>
-      <div className="hidden flex-col gap-4 gap-y-10 md:flex">
+      <div className="hidden flex-col gap-4 md:flex">
         {Array.from({ length: 18 }).map((_, index) => (
           <VideoRowCardSkeleton
             key={index}
@@ -38,7 +38,7 @@ const HistoryVideosSectionSkeleton = () => {
           />
         ))}
       </div>  
-    </div>
+    </>
   )
 }
 
