@@ -11,6 +11,7 @@ import { commentsRouter } from '@/modules/comments/server/procedures';
 import { commentReactionsRouter } from '@/modules/comments-reactions/server/procedures';
 import { suggestionRouter } from '@/modules/suggestions/server/procedures';
 import { searchRouter } from '@/modules/search/server/procedures';
+import { playlistsRouter } from '@/modules/playlists/server/procedures';
 
 
 
@@ -25,6 +26,7 @@ export const AppRouter = createTRPCRouter({ // Se crea un enrutador tRPC
   commentsReactions: commentReactionsRouter,
   suggestions: suggestionRouter,
   search: searchRouter,
+  playlists: playlistsRouter
 });
 
 export type AppRouter = typeof AppRouter
