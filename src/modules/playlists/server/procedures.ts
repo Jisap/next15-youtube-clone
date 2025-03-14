@@ -87,7 +87,7 @@ export const playlistsRouter = createTRPCRouter({
       const nextCursor = hasMore                                         // Si hasMore = true se crea un objeto nextCursor con el id y updatedAt del lastItem
         ? {
           id: lastItem.id,
-          viewedAt: lastItem.likedAt,
+          likedAt: lastItem.likedAt,
         }
         : null
 
