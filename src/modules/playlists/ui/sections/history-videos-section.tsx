@@ -4,6 +4,7 @@
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { DEFAULT_LIMIT } from "@/constant";
 import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -43,13 +44,25 @@ const HistoryVideosSectionSuspense = () => {
 
   return (
     <div>
-      <div className="flex flex-col gap-4 gap-y-10">
+      <div className="flex flex-col gap-4 gap-y-10 md:hidden">
         {videos.pages                           // videos.pages es un array de páginas, donde cada página contiene un array de videos (items). 
           .flatMap((page) => page.items)        // Para cada página en videos.pages, flatMap extrae el array de videos (items) y los combina en un solo array de videos.
           .map((video) => (                     // Después de aplanar el array de videos, se utiliza map para iterar sobre cada video y renderizar un componente VideoGridCard para cada uno.    
             <VideoGridCard 
               key={video.id}
               data={video}
+            />
+          ))
+        }
+      </div>
+      <div className="hidden flex-col gap-4 md:flex">
+        {videos.pages                           // videos.pages es un array de páginas, donde cada página contiene un array de videos (items). 
+          .flatMap((page) => page.items)        // Para cada página en videos.pages, flatMap extrae el array de videos (items) y los combina en un solo array de videos.
+          .map((video) => (                     // Después de aplanar el array de videos, se utiliza map para iterar sobre cada video y renderizar un componente VideoGridCard para cada uno.    
+            <VideoRowCard
+              key={video.id}
+              data={video}
+              size="compact"
             />
           ))
         }
