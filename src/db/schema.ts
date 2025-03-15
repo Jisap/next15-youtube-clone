@@ -35,7 +35,8 @@ export const userRelations = relations(users, ({many}) => ({       // Cada user 
     relationName: "subscriptions_creator_id_fkey"
   }),
   comments: many(comments),                                        // Un usuario puede tener muchos comentarios
-  commentReactions: many(commentReactions)                         // Un usuario puede tener muchas reacciones a comentarios
+  commentReactions: many(commentReactions),                        // Un usuario puede tener muchas reacciones a comentarios
+  playlists: many(playlists),                                      // Un usuario puede tener muchas playlists
 }));
 
 export const subscriptions = pgTable("subscriptions", {
@@ -264,7 +265,18 @@ export const playlistVideos = pgTable("playlist_videos", {                      
     name: "playlist_videos_pk",                                                                  // evitando que un mismo video aparezca más de una vez en la misma playlist.
     columns: [t.playlistId, t.videoId]
   })
-])
+]);
+
+export const playlistVideoRelations = relations(playlistVideos, ({ one }) => ({                  // Define las relaciones explícitas entre la tabla playlistVideos y las tablas playlists y videos.
+  playlist: one(playlists, {                                                                     // Indica que cada fila en playlistVideos está relacionada con una sola fila en playlists.
+    fields: [playlistVideos.playlistId],                                                         // Cada playlistVideos tiene un nombre
+    references: [playlists.id],
+  }),
+  video: one(videos, {                                                                           // Indica que cada fila en playlistVideos pertenece a un solo video en videos.
+    fields: [playlistVideos.videoId],                                                            // Cada playlistVideos tiene un videoId
+    references: [videos.id],
+  }),
+}))
 
 export const playlists = pgTable("playlists", {                                                  // Contiene la información básica sobre cada lista de reproducción
   id: uuid("id").primaryKey().defaultRandom(),
@@ -273,4 +285,12 @@ export const playlists = pgTable("playlists", {                                 
   userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-})
+});
+
+export const playlistRelations = relations(playlists, ({ one, many }) => ({                      // Define las relaciones explícitas entre la tabla playlist y las tablas users y videoPlaylists.
+  user: one(users, {                                                                             // Indica que cada fila en playlistVideos está relacionada con una sola fila en users.
+    fields: [playlists.userId],                                                                  // Cada playlistVideos es creada por un usuario.
+    references: [users.id],
+  }),
+  playlistVideos: many(playlistVideos),                                                          // Una playlist puede contener muchos videos, que se almacenan en la tabla playlistVideos.
+}))                                                                                              // Cada 
