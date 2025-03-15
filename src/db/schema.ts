@@ -1,5 +1,6 @@
 
 
+import { Description } from "@radix-ui/react-toast";
 import { relations } from "drizzle-orm";
 
 import { pgTable, uuid, text, timestamp, uniqueIndex, integer, pgEnum, primaryKey, foreignKey } from "drizzle-orm/pg-core";
@@ -252,3 +253,24 @@ export const videoReactionRelations = relations(videoReactions, ({ one, many }) 
 export const videoReactionSelectSchema = createSelectSchema(videoReactions);                     // Esquema de validación para leer datos de la tabla video_reactions.
 export const videoReactionInsertSchema = createInsertSchema(videoReactions);                     // Esquema de validación para insertar datos en la tabla video_reactions.
 export const videoReactionUpdateSchema = createUpdateSchema(videoReactions); 
+
+export const playlistVideos = pgTable("playlist_videos", {                                       // Relaciona las listas de reproducción con los videos que contienen.
+  playlistId: uuid("playlist_id").references(() => playlists.id, { onDelete: "cascade" }).notNull(),
+  videoId: uuid("video_id").references(() => videos.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+},(t) => [
+  primaryKey({                                                                                   // Esto significa que la combinación de playlistId y videoId debe ser única en la tabla, 
+    name: "playlist_videos_pk",                                                                  // evitando que un mismo video aparezca más de una vez en la misma playlist.
+    columns: [t.playlistId, t.videoId]
+  })
+])
+
+export const playlists = pgTable("playlists", {                                                  // Contiene la información básica sobre cada lista de reproducción
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
