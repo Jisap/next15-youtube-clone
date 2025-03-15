@@ -118,7 +118,8 @@ export const videoRelations = relations(videos, ({ one, many }) => ({           
   }),
   views: many(videoViews),                                                                    // Cada video tiene muchas visualizaciones
   reactions: many(videoReactions),                                                            // Cada video tiene muchas reacciones
-  comments: many(comments)                                                                    // Cada video tiene muchos comentarios
+  comments: many(comments),                                                                   // Cada video tiene muchos comentarios
+  playlistVideos: many(playlistVideos),                                                       // Cada video puede estar en muchas playlists
 }));
 
 export const categoryRelations = relations(categories, ({ many }) => ({
