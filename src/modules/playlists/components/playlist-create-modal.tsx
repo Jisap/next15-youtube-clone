@@ -28,6 +28,8 @@ const formSchema = z.object({
 
 export const PlaylistCreateModal = ({ open, onOpenChange }: PlaylistCreateModalProps) => {
 
+  const utils = trpc.useUtils(); // Accede a las utilidades de caché de tRPC
+
   const form = useForm<z.infer<typeof formSchema>>({ // Formulario para crear una playlist. (.1)
     resolver: zodResolver(formSchema),
     defaultValues:{
@@ -38,6 +40,7 @@ export const PlaylistCreateModal = ({ open, onOpenChange }: PlaylistCreateModalP
 
    const create = trpc.playlists.create.useMutation({   // Mutación para crear una playlist. (.3)
       onSuccess: () => {
+        utils.playlists.getMany.invalidate(); 
         toast.success("Playlist created");
         form.reset();
         onOpenChange(false);
