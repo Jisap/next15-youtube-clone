@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 
 
 interface PlaylistCreateModalProps {
-
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -29,7 +28,7 @@ const formSchema = z.object({
 
 export const PlaylistCreateModal = ({ open, onOpenChange }: PlaylistCreateModalProps) => {
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<z.infer<typeof formSchema>>({ // Formulario para crear una playlist. (.1)
     resolver: zodResolver(formSchema),
     defaultValues:{
       name: ""
@@ -37,7 +36,7 @@ export const PlaylistCreateModal = ({ open, onOpenChange }: PlaylistCreateModalP
   });
 
 
-   const create = trpc.playlists.create.useMutation({   // Mutación para crear una playlist.
+   const create = trpc.playlists.create.useMutation({   // Mutación para crear una playlist. (.3)
       onSuccess: () => {
         toast.success("Playlist created");
         form.reset();
@@ -48,7 +47,7 @@ export const PlaylistCreateModal = ({ open, onOpenChange }: PlaylistCreateModalP
       }
     }); 
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof formSchema>) => { // Función que se ejecuta cuando se envía el formulario. (.2)
     create.mutate(values);
   }
 

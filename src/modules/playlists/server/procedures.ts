@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { playlists, users, videoReactions, videos, videoViews } from "@/db/schema";
+import { playlists, playlistVideos, users, videoReactions, videos, videoViews } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
@@ -200,6 +200,65 @@ export const playlistsRouter = createTRPCRouter({
       }
 
       return createdPlaylist;
-    })
+    }),
+  getMany: protectedProcedure                                           // Indica que este endpoint requiere autenticación.
+    .input(                                                             // Valida los parámetros de entrada:
+      z.object({
+        cursor: z.object({                                              // 1º Cursor que es un objeto con:
+          id: z.string().uuid(),                                        // Identificador del último video cargado.  
+          updatedAt: z.date()                                           // Fecha de visualización del último video cargado.
+        })
+          .nullish(),
+        limit: z.number().min(1).max(100),                              // Y 2º Limit que es el número de videos a recuperar 
+      })
+    )
+      .query(async ({ input, ctx }) => {                                // Validados los datos se procede a la consulta a la base de datos.
+        const { id: userId } = ctx.user;                                // Obtenemos el id de usuario autenticado desde el ctx.
+        const { cursor, limit } = input;                                // Se extraen los valores de input (cursor, limit).
+
+        const data = await db
+          .select({                                                     // Esta consulta mostrará las siguiente columnas:
+            ...getTableColumns(playlists),                              // De la tabla playlists se mostrarán los campos relativos a la misma.                              
+            videoCount: db.$count(                                      // videoCount: número de videos del playlist.
+              playlistVideos,
+              eq(playlists.id, playlistVideos.playlistId)
+            ),
+            user: users,                                                // Se agrega la relación de usuarios
+          })
+          .from(playlists)                                              // Solo se obtienen las playlists 
+          .innerJoin(users, eq(playlists.userId, users.id))             // Solo se seleccionarán playlists cuyos userId existan en la tabla users. 
+          .where(and(
+            eq(playlists.userId, userId),                               // Filtramos solo las suscripciones del usuario actual
+            cursor                                                      // Y si hay un cursor, (Este cursor se usa para obtener solo los videos más antiguos)
+              ? or(
+                lt(playlists.updatedAt, cursor.updatedAt),              // filtra playlist cuya fecha de actualización (updatedAt) sea anterior (<) a la del cursor.
+                and(
+                  eq(playlists.updatedAt, cursor.updatedAt),            // Si dos videos tienen la misma updatedAt, se usa id < cursor.id como desempate.
+                  lt(playlists.id, cursor.id)
+                )
+              )
+              : undefined,
+          )).orderBy(desc(playlists.updatedAt), desc(playlists.id))     // Se ordena en orden descendente por updatedAt y luego por id.
+          .limit(limit + 1)                                             // Se recupera limit + 1 elementos para determinar si hay más páginas disponibles.
+
+
+        const hasMore = data.length > limit;                            // Si data contiene más elementos(limit+1) de los solicitados (limit), significa que hay más videos disponibles.
+
+        const items = hasMore ? data.slice(0, -1) : data;               // Si hay más elementos, se elimina el último para no enviarlo al cliente y así no superar el limit 
+
+        const lastItem = items[items.length - 1];                       // Se extrae el último elemento de items para establecer el cursor de la siguiente página.
+
+        const nextCursor = hasMore                                      // Si hasMore = true se crea un objeto nextCursor con el id y updatedAt del lastItem
+          ? {
+            id: lastItem.id,
+            updatedAt: lastItem.updatedAt,
+          }
+          : null
+
+        return {
+          items,
+          nextCursor, // Este cursor se utilizará en la próxima solicitud para obtener los siguientes videos.
+        }
+      }),
 })
 
