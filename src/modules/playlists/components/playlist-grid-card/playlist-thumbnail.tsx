@@ -1,5 +1,6 @@
 
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/types";
 import { ListVideoIcon, PlayIcon } from "lucide-react";
@@ -13,6 +14,16 @@ interface PlaylistThumbnailProps {
   imageUrl?: string | null;
   className?: string;
 }
+
+
+export const PlaylistThumbnailSkeleton = () => {
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl aspect-video">
+      <Skeleton className="size-full" />
+    </div>
+  )}
+
+
 
 export const PlaylistThumbnail = ({ imageUrl, title, videoCount, className }: PlaylistThumbnailProps) => {
 
