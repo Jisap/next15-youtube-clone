@@ -1,5 +1,8 @@
 import Link from "next/link"
 import { PlaylistGetManyOutput } from "../../types"
+import { THUMBNAIL_FALLBACK } from "@/modules/videos/types"
+import { PlaylistThumbnail } from "./playlist-thumbnail"
+
 
 
 interface PlaylistGridCardProps {
@@ -10,7 +13,11 @@ export const PlaylistGridCard = ({ data }: PlaylistGridCardProps) => {
   return (
     <Link href={`/playlists/${data.id}`}>
       <div className="flex flex-col gap-2 w-full group">
-        {data.name}
+        <PlaylistThumbnail
+          imageUrl={THUMBNAIL_FALLBACK}
+          title={data.name}
+          videoCount={data.videoCount}
+        />
       </div>
     </Link>
   )
