@@ -2,6 +2,7 @@ import Link from "next/link"
 import { PlaylistGetManyOutput } from "../../types"
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/types"
 import { PlaylistThumbnail } from "./playlist-thumbnail"
+import { PlaylistInfo } from "./playlist-info"
 
 
 
@@ -18,6 +19,7 @@ export const PlaylistGridCard = ({ data }: PlaylistGridCardProps) => {
           title={data.name}
           videoCount={data.videoCount}
         />
+        <PlaylistInfo data={data} />
       </div>
     </Link>
   )

@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/types";
 import { ListVideoIcon, PlayIcon } from "lucide-react";
 import Image from "next/image";
+import { useMemo } from "react";
 
 
 interface PlaylistThumbnailProps {
@@ -14,8 +15,15 @@ interface PlaylistThumbnailProps {
 }
 
 export const PlaylistThumbnail = ({ imageUrl, title, videoCount, className }: PlaylistThumbnailProps) => {
+
+  const compactViews = useMemo(() => { // Intl.NumberFormat es una API de JavaScript que permite formatear números de acuerdo con las convenciones de un idioma específico.
+        return Intl.NumberFormat("en", {   // 1000 -> 1k, 1000000 -> 1m, 1000000000 -> 1b
+          notation: "compact"
+        }).format(videoCount)
+  }, [videoCount]);
+
   return (
-    <div className={cn("relative pt-3 group", className)}>
+    <div className={cn("relative pt-3", className)}>
       {/* Stack effect layers */}
       <div className="relative">
         {/* Background layers */}
