@@ -34,6 +34,7 @@ const VideoMenu = ({
   return (
     <>
       <PlaylistAddModal 
+        videoId={videoId}
         open={isOpenPlaylistAddModal}
         onOpenChange={setIsOpenPlaylistAddModal}
       />

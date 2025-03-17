@@ -201,6 +201,7 @@ export const playlistsRouter = createTRPCRouter({
 
       return createdPlaylist;
     }),
+  // Devuelve playlists de un usuario autenticado
   getMany: protectedProcedure                                           // Indica que este endpoint requiere autenticación.
     .input(                                                             // Valida los parámetros de entrada:
       z.object({
@@ -260,6 +261,7 @@ export const playlistsRouter = createTRPCRouter({
         nextCursor, // Este cursor se utilizará en la próxima solicitud para obtener los siguientes videos.
       }
     }),
+  // Devuelve playlists de un usuario autenticado con info extra sobre si un video concreto se encuentra en ellas
   getManyForVideo: protectedProcedure                                   // Indica que este endpoint requiere autenticación.
     .input(                                                             // Valida los parámetros de entrada:
       z.object({
