@@ -235,7 +235,6 @@ export const playlistsRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });                    // Si no existe, se lanza un error
       }
 
-
       const [existingPlaylistVideo] = await db
         .select()
         .from(playlistVideos)
@@ -259,6 +258,63 @@ export const playlistsRouter = createTRPCRouter({
         .returning();
 
       return createdPlaylistVideo;
+    }),
+  removeVideo: protectedProcedure
+    .input(z.object({
+      playlistId: z.string().uuid(),
+      videoId: z.string().uuid(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;
+      const { playlistId, videoId } = input;
+
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(
+          and(
+            eq(playlists.id, playlistId),                             // Verifica si el playlist existe
+            eq(playlists.userId, userId)                              // Verifica si el usuario es el dueño del playlist
+          ))
+
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const [existingVideo] = await db
+        .select()
+        .from(videos)
+        .where(
+          eq(videos.id, videoId),                                      // Verifica si el video existe en la base de datos
+        )
+
+      if (!existingVideo) {
+        throw new TRPCError({ code: "NOT_FOUND" });                    // Si no existe, se lanza un error
+      }
+
+      const [existingPlaylistVideo] = await db
+        .select()
+        .from(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),                 // Verifica si en lista de reproducción existe un registro con el mismo playlistId y videoId
+            eq(playlistVideos.videoId, videoId)
+          )
+        )
+
+      if (!existingPlaylistVideo) {
+        throw new TRPCError({ code: "CONFLICT" });                     // Si no existe, se lanza un error
+      }
+
+      const [deletedPlaylistVideo] = await db                          // Si se pasan todos los tests, se borra el registro en la tabla playlistVideos
+        .insert(playlistVideos)
+        .values({
+          playlistId,
+          videoId,
+        })
+        .returning();
+
+      return deletedPlaylistVideo;
     }),
   // Devuelve playlists de un usuario autenticado
   getMany: protectedProcedure                                           // Indica que este endpoint requiere autenticación.
