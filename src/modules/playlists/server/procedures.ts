@@ -343,6 +343,15 @@ export const playlistsRouter = createTRPCRouter({
             eq(playlists.id, playlistVideos.playlistId)
           ),
           user: users,                                                  // Se agrega la relación de usuarios
+          thumbnailUrl: sql<string | null>                              // Se selecciona la URL de la miniatura del video
+            `(
+              SELECT v.thumbnail_url
+              FROM ${playlistVideos} pv
+              JOIN ${videos} v ON v.id = pv.video_id
+              WHERE pv.playlist_id = ${playlists.id} 
+              ORDER BY pv.updated_at DESC
+              LIMIT 1
+            )`
         })
         .from(playlists)                                                // Solo se obtienen las playlists 
         .innerJoin(users, eq(playlists.userId, users.id))               // Solo se seleccionarán playlists cuyos userId existan en la tabla users. 
