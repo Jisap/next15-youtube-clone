@@ -259,6 +259,7 @@ export const playlistsRouter = createTRPCRouter({
 
       return createdPlaylistVideo;
     }),
+  // Elimina un video de una lista de reproducción
   removeVideo: protectedProcedure
     .input(z.object({
       playlistId: z.string().uuid(),
