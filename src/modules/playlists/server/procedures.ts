@@ -307,11 +307,13 @@ export const playlistsRouter = createTRPCRouter({
       }
 
       const [deletedPlaylistVideo] = await db                          // Si se pasan todos los tests, se borra el registro en la tabla playlistVideos
-        .insert(playlistVideos)
-        .values({
-          playlistId,
-          videoId,
-        })
+        .delete(playlistVideos)
+        .where(
+          and(
+            eq(playlistVideos.playlistId, playlistId),                 // Verifica si en lista de reproducción existe un registro con el mismo playlistId y videoId
+            eq(playlistVideos.videoId, videoId)
+          )
+        )
         .returning();
 
       return deletedPlaylistVideo;
