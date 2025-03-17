@@ -1,8 +1,9 @@
 import { trpc } from "@/trpc/client";
 import { ResponsiveModal } from "@/components/responsive-dialog";
 import { DEFAULT_LIMIT } from "@/constant";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, SquareCheckIcon, SquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InfiniteScroll } from "@/components/infinite-scroll";
 
 
 
@@ -20,9 +21,12 @@ export const PlaylistAddModal = ({ open, onOpenChange, videoId }: PlaylistAddMod
   const { 
     data: playlists,
     isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   } = trpc.playlists.getManyForVideo.useInfiniteQuery({    // playlists de un usuario autenticado con info extra sobre si un video concreto se encuentra en ellas
     videoId: videoId,
-    limit: DEFAULT_LIMIT
+    limit: DEFAULT_LIMIT,
    },{
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     enabled:  !!videoId && open,                           // Si existe el videoId y el modal está abierto, se activa la consulta
@@ -46,11 +50,29 @@ export const PlaylistAddModal = ({ open, onOpenChange, videoId }: PlaylistAddMod
           playlists?.pages
             .flatMap((page) => page.items)
             .map((playlist) => (
-              <Button key={playlist.id}>
+              <Button 
+                key={playlist.id}
+                variant="ghost"
+                className="w-full justify-start px-2 [&_svg]:size-5"
+                size="lg"
+              >
+                {playlist.containsVideo 
+                  ? <SquareCheckIcon className="mr-2"/>
+                  : <SquareIcon className="mr-2"/>
+                }
                 {playlist.name}
               </Button>
             ))
        }
+
+       {!isLoading && (
+          <InfiniteScroll 
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
+            isManual
+          />
+       )}
      </div>
     </ResponsiveModal>
   )
