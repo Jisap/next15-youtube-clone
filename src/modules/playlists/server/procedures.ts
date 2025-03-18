@@ -557,5 +557,49 @@ export const playlistsRouter = createTRPCRouter({
         nextCursor, // Este cursor se utilizará en la próxima solicitud para obtener los siguientes videos.
       }
     }),
+    getOne: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))                                         // Se requiere de un id de un video
+    .query(async ({ input, ctx }) => {
+      const { id: userId } = ctx.user;                                                  // Se requiere la identificación del usuario logueado -> ctx
+      const { id } = input;                                                             // Se requiere el id del video
+    
+      const [existingPlaylist] = await db
+        .select()
+        .from(playlists)
+        .where(
+          and(
+            eq(playlists.id, id),
+            eq(playlists.userId, userId)
+          )
+        );
+    
+      if (!existingPlaylist) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return existingPlaylist;
+    }),
+    remove: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ input, ctx }) => {
+        const { id: userId } = ctx.user;
+        const { id } = input;
+
+          const [deletedPlaylist] = await db
+            .delete(playlists)
+            .where(
+              and(
+                eq(playlists.id, id),
+                eq(playlists.userId, userId)
+              )
+            )
+            .returning();
+
+            if(!deletedPlaylist){
+              throw new TRPCError({ code: "NOT_FOUND" });
+            }
+
+            return deletedPlaylist;
+      })
 })
 
