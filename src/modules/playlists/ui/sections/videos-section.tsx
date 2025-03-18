@@ -9,6 +9,7 @@ import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Video } from 'lucide-react';
+import { toast } from "sonner";
 
 interface VideosSectionProps {
   playlistId: string;
@@ -54,6 +55,21 @@ const VideosSectionSuspense = ({ playlistId }: VideosSectionProps) => {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
+  const utils = trpc.useUtils();
+
+  const removeVideo = trpc.playlists.removeVideo.useMutation({
+    onSuccess: (data) => {
+      toast.success("Video remove from playlist");
+      utils.playlists.getMany.invalidate()
+      utils.playlists.getManyForVideo.invalidate({ videoId: data.videoId })
+      utils.playlists.getOne.invalidate({ id: data.playlistId })
+      utils.playlists.getVideos.invalidate({ playlistId: data.playlistId })
+    },
+    onError: () => {
+      toast.error("Something went wrong");
+    }
+  })
+
   // [videos.pages] -> cada página contiene [videos:items]
   // flatmap obtiene un solo array -> [videos:items]
 
@@ -66,6 +82,7 @@ const VideosSectionSuspense = ({ playlistId }: VideosSectionProps) => {
             <VideoGridCard 
               key={video.id}
               data={video}
+              onRemove={() => removeVideo.mutate({ videoId: video.id, playlistId })}
             />
           ))
         }
@@ -78,6 +95,7 @@ const VideosSectionSuspense = ({ playlistId }: VideosSectionProps) => {
               key={video.id}
               data={video}
               size="compact"
+              onRemove={() => removeVideo.mutate({ videoId: video.id, playlistId })}
             />
           ))
         }
