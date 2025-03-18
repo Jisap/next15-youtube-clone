@@ -1,10 +1,10 @@
 import { db } from "@/db";
-import { videos } from "@/db/schema";
+import { comments, users, videoReactions, videos, videoViews } from "@/db/schema";
 
 
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { eq, and, or, lt, desc } from "drizzle-orm";
+import { eq, and, or, lt, desc, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 
 
@@ -48,8 +48,21 @@ export const studioRouter = createTRPCRouter({
       const { id: userId } = ctx.user;                                  // y el userId del usuario autenticado
 
         const data = await db
-          .select()
+          .select({
+            ...getTableColumns(videos),
+            viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),  // Se obtiene el número de vistas de cada video.
+            commentCount: db.$count(comments, eq(comments.videoId, videos.id)),   // Se obtiene el número de comentarios de cada video.
+            likeCount: db.$count(
+              videoReactions,
+              and(
+                eq(videoReactions.type, "like"),                                  // Se obtiene el número de likes de cada video.
+                eq(videoReactions.videoId, videos.id)
+              )
+            ),
+            user: users,
+          })
           .from(videos)                                                 // Solo se obtienen los videos 
+          .innerJoin(users, eq(videos.userId, users.id))                // que tengan una relación con el usuario autenticado.
           .where(and(
             eq(videos.userId, userId),                                  // del usuario autenticado.
             cursor                                                      // si hay un cursor. Este cursor se usa para obtener solo los videos más antiguos
