@@ -71,7 +71,7 @@ export const videosRouter = createTRPCRouter({
         .innerJoin(users, eq(videos.userId, users.id))                  // (se agrega la relación de usuarios)
         .innerJoin(                                                     // Agregamos la lista de creadores a los que el usuario está suscrito.
           viewerSubcription,
-          eq(viewerSubcription.userId, users.id)                              // Incluimos los users cuyos is = creatorId 
+          eq(viewerSubcription.userId, users.id)                              // Incluimos los users cuyos id = creatorId. De todos los videos, quiero traer solo los que fueron creados por usuarios a los que yo (viewer) sigo
         )
         .where(and(
           eq(videos.visibility, "public"),                              // que sean públicos (visibility = "public")

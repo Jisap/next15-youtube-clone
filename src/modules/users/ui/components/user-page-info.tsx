@@ -1,6 +1,10 @@
 import UserAvatar from "@/components/user-avatar"
 import { UserGetOneOutput } from "../../types"
 import { useClerk, useAuth } from "@clerk/nextjs";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { SubscriptionButton } from "@/modules/subscriptions/ui/components/subscription-button";
+import { useSubscriptions } from "@/modules/subscriptions/hooks/use-subscriptions";
 
 
 
@@ -10,8 +14,13 @@ interface UserPageInfoProps {
 
 const UserPageInfo = ({ user }: UserPageInfoProps) => {
 
-  const { userId } = useAuth();
+  const { userId, isLoaded } = useAuth();
   const clerk = useClerk();
+
+  const { isPending, onClick } = useSubscriptions({ // Gestiona las suscripciones del usuario autenticado
+      userId: user.id,
+      isSubscribed: user.viewerSubscribed,          // Verifica si el usuario autenticado está suscrito al usuario que se consulta en su userPageInfo
+  })
 
   return (
     <div className="py-6">
@@ -39,6 +48,26 @@ const UserPageInfo = ({ user }: UserPageInfoProps) => {
             </div>
           </div>
         </div>
+
+        {userId === user.clerkId ? (
+          <Button
+            variant="secondary"
+            asChild
+            className="w-full mt-3 rounded-full"
+          >
+            <Link href="/studio">
+              Go to studio
+            </Link>
+          </Button>
+        ) : (
+          <SubscriptionButton
+            disabled={isPending || !isLoaded}
+            isSubscribed={user.viewerSubscribed}
+            onClick={onClick}
+            className="w-full mt-3"
+          />
+            
+        )}
       </div>
     </div>
   )
