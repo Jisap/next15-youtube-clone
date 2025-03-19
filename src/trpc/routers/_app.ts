@@ -12,7 +12,7 @@ import { commentReactionsRouter } from '@/modules/comments-reactions/server/proc
 import { suggestionRouter } from '@/modules/suggestions/server/procedures';
 import { searchRouter } from '@/modules/search/server/procedures';
 import { playlistsRouter } from '@/modules/playlists/server/procedures';
-import { usersRouter } from '@/modules/users/ui/components/procedures';
+import { usersRouter } from '@/modules/users/server/procedures';
 
 
 
