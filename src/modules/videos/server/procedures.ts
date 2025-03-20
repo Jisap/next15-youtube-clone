@@ -181,17 +181,18 @@ export const videosRouter = createTRPCRouter({
     .input(                                                             // Valida los parámetros de entrada:
       z.object({
         categoryId: z.string().uuid().nullish(),                        // 1º Parámetro de filtrado: categoryId
-        cursor: z.object({                                              // 2º Cursor que es un objeto con:
+        userId: z.string().uuid().nullish(),                            // 2º Parámetro de filtrado: userId
+        cursor: z.object({                                              // 3º Cursor que es un objeto con:
           id: z.string().uuid(),                                        // Identificador del último video cargado.
           updatedAt: z.date()                                           // Fecha de actualización del último video cargado.  
         })
         .nullish(),
-        limit: z.number().min(1).max(100),                              // Y 3º Limit que es el número de videos a recuperar 
+        limit: z.number().min(1).max(100),                              // Y 4º Limit que es el número de videos a recuperar 
       })
     )
     .query(async ({ input }) => {                                       // Validados los datos se procede a la consulta a la base de datos.
         
-      const { cursor, limit, categoryId } = input;                      // Se extraen los valores de input (cursor, limit, categoryId).
+      const { cursor, limit, categoryId, userId } = input;              // Se extraen los valores de input (cursor, limit, categoryId e userId).
   
         const data = await db
           .select({                                                     // De la tabla videos se seleccionan los campos:
@@ -216,6 +217,7 @@ export const videosRouter = createTRPCRouter({
             .where(and(
               eq(videos.visibility, "public"),                            // que sean públicos (visibility = "public")
               categoryId ? eq(videos.categoryId, categoryId) : undefined, // y que pertenecen a la categoría proporcionada.
+              userId ? eq(videos.userId, userId) : undefined,             // y que pertenecen al usuario proporcionado en el input.
               cursor                                                      // Y si hay un cursor, (Este cursor se usa para obtener solo los videos más antiguos)
                 ? or(
                   lt(videos.updatedAt, cursor.updatedAt),                 // filtra los videos cuya fecha de actualización (updatedAt) sea anterior (<) a la del cursor.
