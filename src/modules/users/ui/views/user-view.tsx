@@ -1,4 +1,4 @@
-import UserSection from "../sections/user-section"
+import { UserSection } from "../sections/user-section"
 import { VideosSection } from "../sections/videos-section"
 
 
