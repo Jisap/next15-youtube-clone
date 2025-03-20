@@ -28,6 +28,7 @@ const UserSectionSkeleton = () => {
     <div className="flex flex-col">
       <UserPageBannerSkeleton />
       <UserPageInfoSkeleton />
+      <Separator />
     </div>
   )
 }
