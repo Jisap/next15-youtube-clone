@@ -94,7 +94,7 @@ export const ourFileRouter = {                                           // Defi
 
       
 
-      if (existingUser.bannerKey) {                                      // Si el video existe y tiene un bannerKey
+      if (existingUser.bannerKey) {                                      // Si el usuario existe y tiene un bannerKey
         const utapi = new UTApi();
         await utapi.deleteFiles(existingUser.bannerKey);                 // borra el archivo de uploadthing
         await db                                                         // Y borra la referencia en bd de la tabla users
