@@ -75,6 +75,54 @@ export const ourFileRouter = {                                           // Defi
 
       return { uploadedBy: metadata.user.id };
     }),
+  bannerlUploader: f({                                                   // 1º Configuración del uploader con la instancia de UploadThing
+    image: {
+      maxFileSize: "4MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {                                             // 2º Middleware: 
+      const { userId: clerkUserId } = await auth();                       // Obtiene el userId de Clerk
+      if (!clerkUserId) throw new UploadThingError("Unauthorized");
+
+      const [existingUser] = await db                                     // Busca el usuario en la base de datos con ese userId
+        .select()
+        .from(users)
+        .where(eq(users.clerkId, clerkUserId))
+
+      if (!existingUser) throw new UploadThingError("Unauthorized");
+
+      
+
+      if (existingUser.bannerKey) {                                      // Si el video existe y tiene un bannerKey
+        const utapi = new UTApi();
+        await utapi.deleteFiles(existingUser.bannerKey);                 // borra el archivo de uploadthing
+        await db                                                         // Y borra la referencia en bd de la tabla users
+          .update(users)
+          .set({
+            bannerKey: null,
+            bannerUrl: null,
+          })
+          .where(and(
+            eq(users.id, existingUser.id)
+          ))
+      }
+
+      return { userId: existingUser.id };                                // 3º Retorna el userId 
+    })
+    .onUploadComplete(async ({ metadata, file }) => {                    // 4º Acción al completar la subida del file
+      await db                                                              // Actualiza la base de datos
+        .update(users)                                                      // actualizando en la tabla users la dirección de la imagen devuelta por UploadThing
+        .set({                                                              // y el key de referencia en uploadthing       
+          bannerUrl: file.url,
+          bannerKey: file.key,
+        })
+        .where(and(
+          eq(users.id, metadata.userId),                                    // donde el id del usuario de base de datos = el id validado por UploadThing
+        ))
+
+      return { uploadedBy: metadata.userId};
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
