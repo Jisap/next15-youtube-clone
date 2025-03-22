@@ -44,8 +44,8 @@ export const userRelations = relations(users, ({many}) => ({       // Cada user 
 export const subscriptions = pgTable("subscriptions", {
   viewerId: uuid("viewer_id").references(() => users.id, { onDelete: "cascade" }).notNull(),   // Representa al usuario que sigue o se suscribe a otro usuario.
   creatorId: uuid("creator_id").references(() => users.id, { onDelete: "cascade" }).notNull(), // Representa al usuario que es seguido o suscrito por otros.
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(), 
+  updatedAt: timestamp("updated_at").defaultNow().notNull(), 
 }, (t) => [
   primaryKey({
     name: "subscriptions_pk",

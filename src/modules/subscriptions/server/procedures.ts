@@ -104,7 +104,7 @@ export const SubscriptionsRouter = createTRPCRouter({
         const nextCursor = hasMore                                          // Si hasMore = true se crea un objeto nextCursor con el id y updatedAt del lastItem
               ? {
                 creatorId: lastItem.creatorId,
-                updatedAt: lastItem.updatedAt,
+                updatedAt: lastItem.updatedAt as Date
               }
               : null
     
