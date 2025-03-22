@@ -67,15 +67,15 @@ const SubscriptionsSectionSuspense = () => {
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  // [videos.pages] -> cada página contiene [videos:items]
-  // flatmap obtiene un solo array -> [videos:items]
+  // [subscriptions.pages] -> cada página contiene [items]
+  // flatmap obtiene un solo array -> [item] -> cada item es un subscription
 
   return (
     <div>
       <div className="flex flex-col gap-4">
-        {subscriptions.pages                           // videos.pages es un array de páginas, donde cada página contiene un array de videos (items). 
-          .flatMap((page) => page.items)        // Para cada página en videos.pages, flatMap extrae el array de videos (items) y los combina en un solo array de videos.
-          .map((subscription) => (                     // Después de aplanar el array de videos, se utiliza map para iterar sobre cada video y renderizar un componente VideoGridCard para cada uno.    
+        {subscriptions.pages                           // subscriptions.pages es un array de páginas, donde cada página contiene un array de subscriptions (items). 
+          .flatMap((page) => page.items)               // Para cada página en subscriptions.pages, flatMap extrae el array de subscriptions (items) y los combina en un solo array de subscriptions.
+          .map((subscription) => (                     // Después de aplanar el array de subscriptions, se utiliza map para iterar sobre cada subscription y renderizar un Link para cada uno.    
             <Link
               key={subscription.creatorId}
               href={`/users/${subscription.user.id}`}
