@@ -3,13 +3,14 @@
 
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { DEFAULT_LIMIT } from "@/constant";
-import { VideoGridCard, VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
-import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
+import { VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
+import { VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { trpc } from "@/trpc/client";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
+import { SubscriptionItem } from "../components/subscription-item";
 
 
 export const SubscriptionsSection = () => {
@@ -80,7 +81,13 @@ const SubscriptionsSectionSuspense = () => {
               key={subscription.creatorId}
               href={`/users/${subscription.user.id}`}
             >
-              {JSON.stringify(subscription)}
+              <SubscriptionItem
+                name={subscription.user.name}
+                imageUrl={subscription.user.imageUrl}
+                subscriberCount={subscription.user.subscriberCount}
+                onUnsubscribe={() => unsubscribe.mutate({ userId: subscription.creatorId })}
+                disabled={unsubscribe.isPending}
+              />
             </Link>
           ))
         }
