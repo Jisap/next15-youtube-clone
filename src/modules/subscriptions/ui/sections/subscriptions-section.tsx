@@ -3,14 +3,12 @@
 
 import { InfiniteScroll } from "@/components/infinite-scroll";
 import { DEFAULT_LIMIT } from "@/constant";
-import { VideoGridCardSkeleton } from "@/modules/videos/ui/components/video-grid-card";
-import { VideoRowCardSkeleton } from "@/modules/videos/ui/components/video-row-card";
 import { trpc } from "@/trpc/client";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { SubscriptionItem } from "../components/subscription-item";
+import { SubscriptionItem, SubscriptionItemSkeleton } from "../components/subscription-item";
 
 
 export const SubscriptionsSection = () => {
@@ -26,21 +24,13 @@ export const SubscriptionsSection = () => {
 const SubscriptionsSectionSkeleton = () => {
   return (
     <>
-      <div className="flex flex-col gap-4 gap-y-10 md:hidden">
-        {Array.from({length: 18}).map((_, index) => (
-          <VideoGridCardSkeleton
+      <div className="flex flex-col gap-4">
+        {Array.from({length: 8}).map((_, index) => (
+          <SubscriptionItemSkeleton
             key={index}
           />
         ))}
       </div>
-      <div className="hidden flex-col gap-4 md:flex">
-        {Array.from({ length: 18 }).map((_, index) => (
-          <VideoRowCardSkeleton
-            key={index}
-            size="compact"
-          />
-        ))}
-      </div>  
     </>
   )
 }
