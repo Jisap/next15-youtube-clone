@@ -30,7 +30,7 @@ const items = [
 export const PersonalSection = () => {
 
   const clerk = useClerk()
-  const { userId, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   const pathname = usePathname();
 
   return (
