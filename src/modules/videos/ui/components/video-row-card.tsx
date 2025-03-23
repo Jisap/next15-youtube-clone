@@ -98,7 +98,7 @@ export const VideoRowCard = ({
 
   return (
     <div className={videoRowCardVariants({ size })}>
-      <Link 
+      <Link prefetch  
         href={`/videos/${data.id}`}
         className={thumbnailVariants({ size })}
       >
@@ -113,7 +113,7 @@ export const VideoRowCard = ({
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between gap-x-2">
-          <Link
+          <Link prefetch 
             href={`/videos/${data.id}`}
             className="flex-1 min-w-0"
           >

@@ -67,7 +67,7 @@ const SubscriptionsSectionSuspense = () => {
         {subscriptions.pages                           // subscriptions.pages es un array de páginas, donde cada página contiene un array de subscriptions (items). 
           .flatMap((page) => page.items)               // Para cada página en subscriptions.pages, flatMap extrae el array de subscriptions (items) y los combina en un solo array de subscriptions.
           .map((subscription) => (                     // Después de aplanar el array de subscriptions, se utiliza map para iterar sobre cada subscription y renderizar un Link para cada uno.    
-            <Link
+            <Link prefetch 
               key={subscription.creatorId}
               href={`/users/${subscription.user.id}`}
             >

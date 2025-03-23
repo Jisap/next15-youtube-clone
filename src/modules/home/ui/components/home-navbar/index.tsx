@@ -17,7 +17,7 @@ export const HomeNavbar = () => {
           <SidebarTrigger 
           
           />
-          <Link href="/" className="hidden md:block">
+          <Link prefetch  href="/" className="hidden md:block">
             <div className="p-4 flex items-center gap-1">
               <Image 
                 src="/logo.svg"

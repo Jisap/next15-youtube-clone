@@ -27,7 +27,7 @@ export const VideoGridCard = ({
   
   return (
     <div className="flex flex-col gap-2 w-full group">
-      <Link
+      <Link prefetch 
         href={`/videos/${data.id}`}
       >
         <VideoThumbnail 
