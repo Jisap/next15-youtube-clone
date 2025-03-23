@@ -1,13 +1,21 @@
 "use client"
 
 import { SearchIcon, XIcon } from "lucide-react"
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { APP_URL } from "@/constant";
 import { Button } from "@/components/ui/button";
-
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const SearchInput = () => {
+  return (
+    <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+      <SearchInputSuspense />
+    </Suspense>
+  )
+}
+
+export const SearchInputSuspense = () => {
 
   const router = useRouter();
   const searchParams = useSearchParams();
