@@ -54,7 +54,7 @@ export const VideoTopRow = ({ video }: VideoTopRowProps) => {
 
   const expandedDate = useMemo(() => {
     return format(video.createdAt, "dd MMM yyyy")
-  },[])
+  },[video.createdAt])
 
   return (
     <div className="flex flex-col gap-4 mt-4">

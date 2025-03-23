@@ -3,7 +3,6 @@ import { users, videoReactions, videos, videoViews } from "@/db/schema";
 
 
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import { TRPCError } from "@trpc/server";
 import { eq, and, or, lt, desc, ilike, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
 

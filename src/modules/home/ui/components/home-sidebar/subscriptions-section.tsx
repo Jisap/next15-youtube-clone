@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import UserAvatar from "@/components/user-avatar"
 import { DEFAULT_LIMIT } from "@/constant"
 import { trpc } from "@/trpc/client"
-import { ListIcon, Sidebar } from "lucide-react"
+import { ListIcon  } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 

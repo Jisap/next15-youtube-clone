@@ -1,5 +1,4 @@
 import { CategoriesSection } from "../sections/categories-section";
-import { categories } from '../../../../db/schema';
 import { ResultsSection } from "../sections/results-section";
 
 

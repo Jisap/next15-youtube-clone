@@ -3,12 +3,12 @@ import { subscriptions, users, videoReactions, videos, videoViews } from "@/db/s
 import { mux } from "@/lib/mux";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { videoUpdateSchema } from '../../../db/schema';
-import { and, DBQueryConfig, desc, eq, getTableColumns, inArray, isNotNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, isNotNull, lt, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
 import { workflow } from "@/lib/workflow";
-import { view } from "drizzle-orm/sqlite-core";
+
 
 
 

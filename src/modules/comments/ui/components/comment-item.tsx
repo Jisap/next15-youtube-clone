@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { CommentGetManyOutput } from "../../types"
 import UserAvatar from "@/components/user-avatar"
-import { formatDistanceToNow, set } from "date-fns"
+import { formatDistanceToNow } from "date-fns"
 import { 
   DropdownMenu, 
   DropdownMenuContent, 

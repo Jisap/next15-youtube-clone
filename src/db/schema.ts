@@ -1,6 +1,5 @@
 
 
-import { Description } from "@radix-ui/react-toast";
 import { relations } from "drizzle-orm";
 
 import { pgTable, uuid, text, timestamp, uniqueIndex, integer, pgEnum, primaryKey, foreignKey } from "drizzle-orm/pg-core";
@@ -53,7 +52,7 @@ export const subscriptions = pgTable("subscriptions", {
   }),
 ]);
 
-export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({         // Se agregan relaciones a la tabla subscriptions
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({               // Se agregan relaciones a la tabla subscriptions
   viewer: one(users, {                                                                       // Cada subscription tiene un viewerId que apunta a un id en la tabla users.
     fields: [subscriptions.viewerId],
     references: [users.id], 
@@ -189,7 +188,7 @@ export const commentReactions = pgTable("comment_reactions", {
   }),
 ]);
 
-export const commentReactionRelations = relations(commentReactions, ({ one, many }) => ({       // Relaciones para la tabla comment_reactions
+export const commentReactionRelations = relations(commentReactions, ({ one }) => ({             // Relaciones para la tabla comment_reactions
   user: one(users, {                                                                            // Cada reaction tiene un usuario
     fields: [commentReactions.userId],                                                          // Cada fila en comment_reactions tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                     // Cada userId de comment_reactions apunta a un id en la tabla users.
@@ -212,7 +211,7 @@ export const videoViews = pgTable("video_views", {                              
   }),
 ])
 
-export const videoViewRelations = relations(videoViews, ({ one, many }) => ({                    // Relaciones para la tabla video_views
+export const videoViewRelations = relations(videoViews, ({ one }) => ({                          // Relaciones para la tabla video_views
   user: one(users, {                                                                             // Relación "muchos" a "uno" con la tabla users
     fields: [videoViews.userId],                                                                 // Cada fila en videoViews tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                      // Cada userId de videoViews apunta a un id en la tabla users.
@@ -243,7 +242,7 @@ export const videoReactions = pgTable("video_reactions", {                      
   }),
 ]);
 
-export const videoReactionRelations = relations(videoReactions, ({ one, many }) => ({            // Relaciones para la tabla video_reactions
+export const videoReactionRelations = relations(videoReactions, ({ one }) => ({                  // Relaciones para la tabla video_reactions
   user: one(users, {                                                                             // Cada reaction tiene un usuario
     fields: [videoReactions.userId],                                                             // Cada fila en video_reactions tiene un userId que apunta a un id en la tabla users.
     references: [users.id],                                                                      // Cada userId de video_reactions apunta a un id en la tabla users.

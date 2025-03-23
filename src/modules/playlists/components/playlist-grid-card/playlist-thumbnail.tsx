@@ -26,7 +26,7 @@ export const PlaylistThumbnailSkeleton = () => {
 
 
 export const PlaylistThumbnail = ({ imageUrl, title, videoCount, className }: PlaylistThumbnailProps) => {
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const compactViews = useMemo(() => { // Intl.NumberFormat es una API de JavaScript que permite formatear números de acuerdo con las convenciones de un idioma específico.
         return Intl.NumberFormat("en", {   // 1000 -> 1k, 1000000 -> 1m, 1000000000 -> 1b
           notation: "compact"

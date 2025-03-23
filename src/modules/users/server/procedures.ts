@@ -1,8 +1,8 @@
 
 import { db } from "@/db";
-import { subscriptions, users, videoReactions, videos, videoViews } from "@/db/schema";
+import { subscriptions, users, videos } from "@/db/schema";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import { and, eq, getTableColumns, inArray, isNotNull, lt, or } from "drizzle-orm";
+import { and, eq, getTableColumns, inArray, isNotNull } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 

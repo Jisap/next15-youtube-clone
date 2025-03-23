@@ -1,6 +1,5 @@
 
-import { comments, subscriptions, videoReactions } from '@/db/schema';
-import { baseProcedure, protectedProcedure, createTRPCRouter } from '../init';
+import { createTRPCRouter } from '../init';
 import { categoriesRouter } from '@/modules/categories/server/procedures';
 import { studioRouter } from '@/modules/studio/server/procedures';
 import { videoViewsRouter } from '@/modules/video-views/server/procedures';

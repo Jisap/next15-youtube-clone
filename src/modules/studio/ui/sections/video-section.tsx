@@ -3,12 +3,11 @@
 import { InfiniteScroll } from "@/components/infinite-scroll"
 import { DEFAULT_LIMIT } from "@/constant"
 import { trpc } from "@/trpc/client"
-import { Suspense, useRef } from "react"
+import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,

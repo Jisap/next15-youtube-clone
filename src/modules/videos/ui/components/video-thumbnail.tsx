@@ -1,7 +1,6 @@
 import Image from "next/image"
 import { formatDuration } from "@/lib/utils";
 import { THUMBNAIL_FALLBACK } from "../../types";
-import { Video } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface VideoThumbnailProps {

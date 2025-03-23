@@ -24,6 +24,7 @@ const StudioUploadModal = () => {
     }                                                
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const onSuccess = () => {
     if(!create.data?.video.id) return;
     create.reset();                                         // Se resetea la mutation cuando se cierra el modal

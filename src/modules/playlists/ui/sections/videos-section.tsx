@@ -8,7 +8,6 @@ import { VideoRowCard, VideoRowCardSkeleton } from "@/modules/videos/ui/componen
 import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Video } from 'lucide-react';
 import { toast } from "sonner";
 
 interface VideosSectionProps {

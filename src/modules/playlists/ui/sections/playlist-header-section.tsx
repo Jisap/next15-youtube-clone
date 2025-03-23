@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { trpc } from "@/trpc/client"
-import { Trash, Trash2Icon } from "lucide-react"
+import { Trash2Icon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 import { ErrorBoundary } from "react-error-boundary"
